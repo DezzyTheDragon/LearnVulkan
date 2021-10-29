@@ -1,0 +1,9 @@
+#Directories
+.vs/
+bin/
+LearnVulkan/obj
+
+#Files
+*.sln
+*.vcxproj
+*.vcxproj.user
