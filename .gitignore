@@ -4,6 +4,6 @@ bin/
 LearnVulkan/obj
 
 #Files
-*.sln
-*.vcxproj
-*.vcxproj.user
+**.sln
+**.vcxproj
+**.vcxproj.user

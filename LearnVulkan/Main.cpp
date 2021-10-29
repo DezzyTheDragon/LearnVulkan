@@ -1,38 +1,34 @@
 #define GLFW_INCLUDE_VULKAN
+#define _CRTDGB_MAP_ALLOC
 #include <GLFW/glfw3.h>
 
-#define GLM_FORCE_RADIANS
-#define GLM_FORCE_DEPTH_ZERO_TO_ONE
-#include <vec4.hpp>
-#include <mat4x4.hpp>
-
 #include <iostream>
+#include <stdexcept>
+#include <cstdlib>
+#include <stdlib.h>
+#include <crtdbg.h>
 
-//NOTE get glfw for win 64 because that matches vulkan
+#include "HelloTriangle.h"
 
 int main()
 {
-	glfwInit();
+	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+	_CrtSetReportMode(_CRT_WARN, _CRTDBG_MODE_DEBUG);
 
-	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-	GLFWwindow* window = glfwCreateWindow(800, 600, "Learn Vulkan", nullptr, nullptr);
 
-	uint32_t extentionCount = 0;
-	vkEnumerateInstanceExtensionProperties(nullptr, &extentionCount, nullptr);
+	HelloTriangle ht;
 
-	std::cout << extentionCount << " extensions supported\n";
-
-	glm::mat4 matrix;
-	glm::vec4 vec;
-	auto test = matrix * vec;
-
-	while (!glfwWindowShouldClose(window))
+	try
 	{
-		glfwPollEvents();
+		ht.run();
+	}
+	catch (const std::exception& e)
+	{
+		std::cerr << e.what() << std::endl;
+		return EXIT_FAILURE;
 	}
 
-	glfwDestroyWindow(window);
-	glfwTerminate();
 
-	return 0;
+	_CrtDumpMemoryLeaks();
+	return EXIT_SUCCESS;
 }
