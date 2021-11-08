@@ -41,8 +41,12 @@ void HelloTriangle::setupDebugMessenger()
 	}
 
 
-	VkDebugUtilsMessengerCreateInfoEXT createInfo{};
-	createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
+
+
+	VkDebugUtilsMessengerCreateInfoEXT createInfo;
+	populateDebugMessengerCreateInfo(createInfo);
+
+	/*createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
 	createInfo.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT | 
 								 VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
 								 VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
@@ -51,7 +55,8 @@ void HelloTriangle::setupDebugMessenger()
 							 VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
 	createInfo.pfnUserCallback = debugCallback;
 	createInfo.pUserData = nullptr;
-	
+	*/
+
 	//TODO: Figure out how to either scope the VkResult or change the enum class to an enum
 	if (CreateDebugUtilsMessegerEXT(m_instance, &createInfo, nullptr, &m_debugMessager) != VK_SUCCESS)
 	{
@@ -115,15 +120,21 @@ void HelloTriangle::createInstance()
 	createInfo.ppEnabledExtensionNames = glfwExtensions;
 	createInfo.enabledLayerCount = 0;
 
+	VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo{};
 	//Include validation layer names
 	if (m_enableValidationLayers)
 	{
 		createInfo.enabledLayerCount = static_cast<uint32_t>(m_validationLayers.size());
 		createInfo.ppEnabledLayerNames = m_validationLayers.data();
+
+		populateDebugMessengerCreateInfo(debugCreateInfo);
+		createInfo.pNext = (VkDebugUtilsMessengerCreateInfoEXT*) &debugCreateInfo;
 	}
 	else
 	{
 		createInfo.enabledLayerCount = 0;
+
+		createInfo.pNext = nullptr;	
 	}
 
 	auto ext = getRequiredExtensions();
@@ -229,4 +240,13 @@ void HelloTriangle::DestroyDebugUtilsMessegerEXT(VkInstance instance, VkDebugUti
 	{
 		func(instance, debugMessenger, pAllocator);
 	}
+}
+
+void HelloTriangle::populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& createInfo)
+{
+	createInfo = {};
+	createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
+	createInfo.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
+	createInfo.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
+	createInfo.pfnUserCallback = debugCallback;
 }

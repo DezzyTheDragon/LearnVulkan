@@ -19,7 +19,7 @@ private:
 	void createInstance();
 	bool checkValidationLayerSupport();
 	
-	//TODO: move messenger functions to their own class to avoid having to rewrite them
+	//TODO: move messenger functions to their own class to avoid having to rewrite this long mess
 
 	std::vector<const char*> getRequiredExtensions();
 	static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
@@ -30,6 +30,8 @@ private:
 	VkResult CreateDebugUtilsMessegerEXT(VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo, 
 											const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pDebugMessenger);
 	void DestroyDebugUtilsMessegerEXT(VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger, const VkAllocationCallbacks* pAllocator);
+	void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& createInfo);
+
 
 	GLFWwindow* m_window;
 	VkInstance m_instance;
