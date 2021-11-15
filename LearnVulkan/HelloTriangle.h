@@ -2,9 +2,24 @@
 #define GLFW_INCLUDE_VULKAN
 #define DEBUG_NEW new(__FILE__, __LINE__)
 #define new DEBUG_NEW
+#define VK_LAYER_VERBOSE
 #include <GLFW/glfw3.h>
 #include <vector>
+#include <optional>		//NOTE: optional was added in C++17
 
+
+struct QueueFamilyIndices
+{
+	//using optional so that we can know if there is or is not a valid queue family that exists. 
+	//With just uint32 there is no way to know since 0 could also be a valid entry
+	std::optional<uint32_t> graphicsFamily;
+	std::optional<uint32_t> presentFamily;
+
+	bool isComplete()
+	{
+		return graphicsFamily.has_value() && presentFamily.has_value();
+	}
+};
 
 class HelloTriangle
 {
@@ -13,12 +28,19 @@ public:
 private:
 	void initWindow();
 	void initVulkan();
+	void createSurface();
 	void setupDebugMessenger();
 	void mainLoop();
 	void cleanUp();
 	void createInstance();
 	bool checkValidationLayerSupport();
 	
+	void pickPhysicalDevice();
+	bool isDeviceSuitable(VkPhysicalDevice device);
+
+	void createLogicalDevice();
+
+	QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device);
 	//TODO: move messenger functions to their own class to avoid having to rewrite this long mess
 
 	std::vector<const char*> getRequiredExtensions();
@@ -31,7 +53,7 @@ private:
 											const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pDebugMessenger);
 	void DestroyDebugUtilsMessegerEXT(VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger, const VkAllocationCallbacks* pAllocator);
 	void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& createInfo);
-
+	
 
 	GLFWwindow* m_window;
 	VkInstance m_instance;
@@ -42,12 +64,34 @@ private:
 
 	const std::vector<const char*> m_validationLayers;
 
+	VkPhysicalDevice m_physicalDevice = VK_NULL_HANDLE;
+	VkDevice m_device;
+	VkQueue m_graphicsQueue;
+	VkQueue m_presentQueue;
+
+	VkSurfaceKHR m_surface;
+
+
 	//Only have validation layers enabled for debug builds
 #ifdef NDEBUG
 	const bool m_enableValidationLayers = false;
 #else
 	const bool m_enableValidationLayers = true;
 #endif // NDEBUG
+
+//Controll how verbose I want the validation layers to make finding error and warning messages easier
+#ifdef VK_LAYER_VERBOSE
+	int m_dbgmsg_msgseverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
+	int m_dbgmsg_msgtype = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
+#endif // VK_LAYER_VERBOSE
+#ifdef VK_LAYER_WARNING
+	int m_dbgmsg_msgseverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
+	int m_dbgmsg_msgtype = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
+#endif // VK_LAYER_WARNING
+#ifdef VK_LAYER_ERROR
+	int m_dbgmsg_msgseverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
+	int m_dbgmsg_msgtype = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
+#endif //VK_LAYER_ERROR
 
 };
 

@@ -2,6 +2,7 @@
 .vs/
 bin/
 LearnVulkan/obj
+vendor/
 
 #Files
 **.sln
