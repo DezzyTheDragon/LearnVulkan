@@ -244,11 +244,42 @@ bool HelloTriangle::isDeviceSuitable(VkPhysicalDevice device)
 	//Specify required features that we need	
 	//return deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU && deviceFeatures.geometryShader;
 
+
 	//Right now all we require is to run vulkan and have the right families
 	QueueFamilyIndices indices = findQueueFamilies(device);
 
-	return indices.isComplete();
-	//return true;
+	bool extensionSupported = checkDeviceExtensionSupport(device);
+
+	//check for supported swap chain
+	bool swapChainAdequate = false;
+	//check for support AFTER making sure there is an extention that supports us
+	if (extensionSupported)
+	{
+		SwapChainSupportDetails swapChainSupport = querySwapChainSupport(device);
+		//For learing all we care about is having a supported format and presentation mode, not very picky on what it actually is
+		swapChainAdequate = !swapChainSupport.formats.empty() && !swapChainSupport.presentModes.empty();
+	}
+
+	return indices.isComplete() && extensionSupported && swapChainAdequate;
+}
+
+bool HelloTriangle::checkDeviceExtensionSupport(VkPhysicalDevice device)
+{
+	uint32_t extensionCount;
+	vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, nullptr);
+
+	std::vector<VkExtensionProperties> availableExtensions(extensionCount);
+	vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, availableExtensions.data());	
+
+	std::set<std::string> requiredExtensions(m_deviceExtensions.begin(), m_deviceExtensions.end());
+
+	for (const auto& extension : availableExtensions)
+	{
+		requiredExtensions.erase(extension.extensionName);
+	}
+
+
+	return requiredExtensions.empty();
 }
 
 void HelloTriangle::createLogicalDevice()
@@ -285,7 +316,10 @@ void HelloTriangle::createLogicalDevice()
 	createInfo.queueCreateInfoCount = static_cast<uint32_t>(queueCreateInfos.size());
 	createInfo.pEnabledFeatures = &deviceFeatures;
 
-	createInfo.enabledExtensionCount = 0;
+	//createInfo.enabledExtensionCount = 0;
+
+	createInfo.enabledExtensionCount = static_cast<uint32_t>(m_deviceExtensions.size());
+	createInfo.ppEnabledExtensionNames = m_deviceExtensions.data();
 
 	if (m_enableValidationLayers)
 	{
@@ -343,6 +377,41 @@ QueueFamilyIndices HelloTriangle::findQueueFamilies(VkPhysicalDevice device)
 
 
 	return indices;
+}
+
+//Populate the SwapChainSupportDetails struct with information
+SwapChainSupportDetails HelloTriangle::querySwapChainSupport(VkPhysicalDevice device)
+{
+	SwapChainSupportDetails details;
+
+	//checks if the given device supports the surface that is used
+	vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, m_surface, &details.capabilities);
+
+	//get a list of supported formats and add that to the struct
+	uint32_t formatCount;
+	vkGetPhysicalDeviceSurfaceFormatsKHR(device, m_surface, &formatCount, nullptr);
+
+	if (formatCount != 0)
+	{
+		//resize to make sure that it can hold all the formats
+		details.formats.resize(formatCount);
+		vkGetPhysicalDeviceSurfaceFormatsKHR(device, m_surface, &formatCount, details.formats.data());
+	}
+
+	//get a list of supported presentation modes and add to the struct as well
+	//code is similar to getting the list of formats
+	uint32_t presentModeCount;
+	vkGetPhysicalDeviceSurfacePresentModesKHR(device, m_surface, &presentModeCount, nullptr);
+
+	if (presentModeCount != 0)
+	{
+		//again resize to make sure it can hold everything
+		details.presentModes.resize(presentModeCount);
+		vkGetPhysicalDeviceSurfacePresentModesKHR(device, m_surface, &presentModeCount, details.presentModes.data());	//TODO: again track down this warning and fix
+	}
+
+
+	return details;
 }
 
 //Get a list of the Extensions we need

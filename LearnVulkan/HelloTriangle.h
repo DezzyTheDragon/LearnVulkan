@@ -21,6 +21,15 @@ struct QueueFamilyIndices
 	}
 };
 
+//Structure to hold onto the details of swapchain support for passing around
+struct SwapChainSupportDetails
+{
+	VkSurfaceCapabilitiesKHR capabilities;
+	std::vector<VkSurfaceFormatKHR> formats;
+	std::vector<VkPresentModeKHR> presentModes;
+
+};
+
 class HelloTriangle
 {
 public:
@@ -37,10 +46,14 @@ private:
 	
 	void pickPhysicalDevice();
 	bool isDeviceSuitable(VkPhysicalDevice device);
+	bool checkDeviceExtensionSupport(VkPhysicalDevice device);
 
 	void createLogicalDevice();
 
 	QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device);
+
+	SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device);
+
 	//TODO: move messenger functions to their own class to avoid having to rewrite this long mess
 
 	std::vector<const char*> getRequiredExtensions();
@@ -62,7 +75,8 @@ private:
 	uint32_t m_WIDTH = 800;
 	uint32_t m_HEIGHT = 600;
 
-	const std::vector<const char*> m_validationLayers;
+	const std::vector<const char*> m_validationLayers = {"VK_LAYER_KHRONOS_validation"};
+	const std::vector<const char*> m_deviceExtensions = {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
 
 	VkPhysicalDevice m_physicalDevice = VK_NULL_HANDLE;
 	VkDevice m_device;
