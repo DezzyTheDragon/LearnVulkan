@@ -91,6 +91,10 @@ private:
 	VkSurfaceKHR m_surface;
 
 	VkSwapchainKHR m_swapChain;
+	std::vector<VkImage> m_swapChainImages;
+	VkFormat m_swapChainImageFormat;
+	VkExtent2D m_swapChainExtent;
+
 
 	//Only have validation layers enabled for debug builds
 #ifdef NDEBUG
