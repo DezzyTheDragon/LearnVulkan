@@ -3,6 +3,8 @@
 #include <iostream>
 #include <map>
 #include <set>
+#include <cstdint>
+#include <algorithm>
 
 //VkSurfaceKHR m_surface;
 
@@ -34,6 +36,7 @@ void HelloTriangle::initVulkan()
 	createSurface();
 	pickPhysicalDevice();
 	createLogicalDevice();
+	createSwapChain();
 }
 
 void HelloTriangle::createSurface()
@@ -95,6 +98,8 @@ void HelloTriangle::cleanUp()
 	{
 		DestroyDebugUtilsMessegerEXT(m_instance, m_debugMessager, nullptr);
 	}
+
+	vkDestroySwapchainKHR(m_device, m_swapChain, nullptr);
 
 	vkDestroyDevice(m_device, nullptr);
 	vkDestroySurfaceKHR(m_instance, m_surface, nullptr);
@@ -379,6 +384,77 @@ QueueFamilyIndices HelloTriangle::findQueueFamilies(VkPhysicalDevice device)
 	return indices;
 }
 
+//Create the swapchain
+void HelloTriangle::createSwapChain()
+{
+	//SwapChain is like a framebuffer, it queues up the images to be displayed
+	//create and query for the supported swap chains
+	SwapChainSupportDetails swapChainSupport = querySwapChainSupport(m_physicalDevice);
+
+	//populate the struct with the supported information
+	VkSurfaceFormatKHR surfaceFormat = choseSwapChainSurfaceFormat(swapChainSupport.formats);
+	VkPresentModeKHR presentMode = choseSwapPresentMode(swapChainSupport.presentModes);
+	VkExtent2D extent = chooseSwapExtent(swapChainSupport.capabilities);
+
+	//decide how many images we can hold in the swap chain
+	//We do not want to have to wait for driver operations to finish before we can get another
+	//image so it is recomended that we request one more than the minimum
+	uint32_t imageCount = swapChainSupport.capabilities.minImageCount + 1;
+
+	//we need to make sure that our request does not exceed the max number of images
+	if (swapChainSupport.capabilities.maxImageCount > 0 && imageCount > swapChainSupport.capabilities.maxImageCount)
+	{
+		imageCount = swapChainSupport.capabilities.maxImageCount;
+	}
+
+	//fill the SwapChain struct with the required info
+	VkSwapchainCreateInfoKHR createInfo {};
+	createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
+	createInfo.surface = m_surface;
+	createInfo.minImageCount = imageCount;
+	createInfo.imageFormat = surfaceFormat.format;
+	createInfo.imageColorSpace = surfaceFormat.colorSpace;
+	createInfo.imageExtent = extent;
+	createInfo.imageArrayLayers = 1;								//the amount of layers that each image consists of (will almost always be 1)
+	createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;	//dictates how the image is going to be used. In this case we are rendering directly to them
+
+	//We need to specify how to handle the swapchain across multiple queuefamilies
+	QueueFamilyIndices indicies = findQueueFamilies(m_physicalDevice);
+	uint32_t queueFamilyIndices[] = {indicies.graphicsFamily.value(), indicies.presentFamily.value()};
+
+	
+	if (indicies.graphicsFamily != indicies.presentFamily)
+	{
+		createInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;		//Images can used across multiple queue families without explicit ownership
+		createInfo.queueFamilyIndexCount = 2;
+		createInfo.pQueueFamilyIndices = queueFamilyIndices;
+	}
+	else
+	{
+		createInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;		//Images have onership and need to be explicitly transfered
+		createInfo.queueFamilyIndexCount = 0;
+		createInfo.pQueueFamilyIndices = nullptr;	
+	}
+
+	//we can transform the images in the swap chain
+	createInfo.preTransform = swapChainSupport.capabilities.currentTransform;	//we do not want any transform so just give the current transform
+	//compsit apha can be used for blending with other windows
+	createInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;		//just want to igore any alpha right now
+	createInfo.presentMode = presentMode;
+	createInfo.clipped = VK_TRUE;			//We do not care about the color of pixles that are obscured
+	//It is possible for the swapchain to become invalid over the coarse of the program running
+	//such as the window being resized. The chain needs to be remade and the old one needs
+	//to be referenced here. For now we will asume that there will only be one
+	createInfo.oldSwapchain = VK_NULL_HANDLE;
+
+	//put everything together into a new swapchain
+	if (vkCreateSwapchainKHR(m_device, &createInfo, nullptr, &m_swapChain) != VK_SUCCESS)
+	{
+		throw std::runtime_error("Failed to create swapchain");
+	}
+
+}
+
 //Populate the SwapChainSupportDetails struct with information
 SwapChainSupportDetails HelloTriangle::querySwapChainSupport(VkPhysicalDevice device)
 {
@@ -412,6 +488,87 @@ SwapChainSupportDetails HelloTriangle::querySwapChainSupport(VkPhysicalDevice de
 
 
 	return details;
+}
+
+//Swap Extent is the resolution of the images that are in the swap chain. Usually matches the resolution of the window
+VkExtent2D HelloTriangle::chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities)
+{
+	//Vulkan works with pixels but GLFW allows for screen coordinates. In certain situations they do not translate
+	//very well so we need to use glfwGetFramebufferSize to get the resolution of the window in pixels before we
+	//can match it aginast the min/max image extent
+
+
+	//Normaly the extent matches the window resolution. However we can set our own values if 
+	//currentExtent is set to the maximum value of a uint32_t
+	if (capabilities.currentExtent.width != UINT32_MAX)
+	{
+		return capabilities.currentExtent;
+	}
+	else
+	{
+		//the current extent is set to the max of uint32_t so we need to make sure that
+		//everything is set properly
+
+		//Get the correct pixel resolution of the window
+		int width;
+		int height;
+		glfwGetFramebufferSize(m_window, &width, &height);
+
+		VkExtent2D actualExtent = {
+			static_cast<uint32_t>(width),
+			static_cast<uint32_t>(height)
+		};
+
+		//our actualExtent needs to still fit within the min/max extent so we need to clamp it. Any other values won't work
+		actualExtent.width = std::clamp(actualExtent.width, capabilities.minImageExtent.width, capabilities.maxImageExtent.width);
+		actualExtent.height = std::clamp(actualExtent.height, capabilities.minImageExtent.height, capabilities.maxImageExtent.height);
+		
+		return actualExtent;
+	}
+
+	//return VkExtent2D();
+}
+
+//Find the ideal Present Mode
+//The Present mode is the condition for swapping the images on screen
+VkPresentModeKHR HelloTriangle::choseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes)
+{
+	//Go through the list of available present modes and see if VK_PRESENT_MODE_MAILBOX_KHR is available
+	for (const auto& availablePresentMode : availablePresentModes)
+	{
+		//VK_PRESENT_MODE_MAILBOX_KHR is similar to VK_PRESENT_MODE_FIFO_KHR except that new images replace the ones in the queue ("triple buffering")
+		//Little power hungry, but it is a nice trade off with avoiding tearing and relitivly low latency
+		if (availablePresentMode == VK_PRESENT_MODE_MAILBOX_KHR)
+		{
+			return availablePresentMode;
+		}
+	}
+	
+
+	//VK_PRESENT_MODE_FIFO_KHR is the only mode that is garanteed
+	//VK_PRESENT_MODE_FIFO_KHR swaps the image when the screen refreshes, however if the queue is full the program is forced to wait (similar to v-sync)
+	return VK_PRESENT_MODE_FIFO_KHR;
+}
+
+//Find the ideal Surface format
+VkSurfaceFormatKHR HelloTriangle::choseSwapChainSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats)
+{
+	//We are going to target and prioritize the SRGB color format for more acurate colors. It is also the standard for most images
+
+	//go through the available list and see if SRGB is available
+	for (const auto& availableFormat : availableFormats)
+	{
+		//VK_FORMAT_B8G8R8A8_SRGB = 8 bits for Blue | 8 bits for Green | 8 bits for Red | 8 bits for Alpha
+		if (availableFormat.format == VK_FORMAT_B8G8R8A8_SRGB && availableFormat.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR)	//VK_COLORSPACE_SRGB_NONLINEAR_KHR is for older versions of the vulkan specification
+		{
+			//return the desired format
+			return availableFormat;
+		}
+	}
+
+	//if we don't have our prefered format idealy we would rank and chose the "best" format but in mose cases
+	//and the fact that this is for learning purposes chosing the first one should be fine
+	return availableFormats[0];
 }
 
 //Get a list of the Extensions we need

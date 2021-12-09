@@ -52,7 +52,12 @@ private:
 
 	QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device);
 
+	void createSwapChain();
 	SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device);
+	VkSurfaceFormatKHR choseSwapChainSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats);
+	VkPresentModeKHR choseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes);
+	VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities);
+
 
 	//TODO: move messenger functions to their own class to avoid having to rewrite this long mess
 
@@ -85,6 +90,7 @@ private:
 
 	VkSurfaceKHR m_surface;
 
+	VkSwapchainKHR m_swapChain;
 
 	//Only have validation layers enabled for debug builds
 #ifdef NDEBUG
