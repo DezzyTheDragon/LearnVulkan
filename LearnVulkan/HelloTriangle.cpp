@@ -37,6 +37,7 @@ void HelloTriangle::initVulkan()
 	pickPhysicalDevice();
 	createLogicalDevice();
 	createSwapChain();
+	createImageViews();
 }
 
 void HelloTriangle::createSurface()
@@ -97,6 +98,11 @@ void HelloTriangle::cleanUp()
 	if (m_enableValidationLayers)
 	{
 		DestroyDebugUtilsMessegerEXT(m_instance, m_debugMessager, nullptr);
+	}
+
+	for (auto imageView : m_swapChainImageViews)
+	{
+		vkDestroyImageView(m_device, imageView, nullptr);
 	}
 
 	vkDestroySwapchainKHR(m_device, m_swapChain, nullptr);
@@ -463,6 +469,7 @@ void HelloTriangle::createSwapChain()
 	m_swapChainImages.resize(imageCount);
 	vkGetSwapchainImagesKHR(m_device, m_swapChain, &imageCount, m_swapChainImages.data());
 
+
 }
 
 //Populate the SwapChainSupportDetails struct with information
@@ -596,6 +603,51 @@ std::vector<const char*> HelloTriangle::getRequiredExtensions()
 	}
 
 	return extensions;
+}
+
+//Create a Image View for viewing images
+void HelloTriangle::createImageViews()
+{
+	//In order to view an image we need to create an image view
+	//An Image view describes how to access the image and what
+	//part to access
+	
+	//Resize the vector so it can hold all the images
+	m_swapChainImageViews.resize(m_swapChainImages.size());
+
+	for(size_t i = 0; i < m_swapChainImages.size(); i++)
+	{
+		//Time to create more info
+		VkImageViewCreateInfo createInfo{};
+		createInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+		createInfo.image = m_swapChainImages[i];
+
+		createInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;	//Specifies how to treat the image
+		createInfo.format = m_swapChainImageFormat;		//Specify how the image data should be interpreted. Based of the swap chain image format
+
+		//You can use the components to "swizzle" the color chanels around allowing you to remap color channels
+		//We will just be using the defaults here
+		createInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
+		createInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
+		createInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
+		createInfo.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
+
+		//subresourceRange defines the images purpose and what part will be accessed
+		createInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		//No mipmapping levels
+		createInfo.subresourceRange.baseMipLevel = 0;
+		createInfo.subresourceRange.levelCount = 1;
+		//No multiple layers
+		createInfo.subresourceRange.baseArrayLayer = 0;
+		createInfo.subresourceRange.layerCount = 1;
+
+		//Create the Image View
+		if (vkCreateImageView(m_device, &createInfo, nullptr, &m_swapChainImageViews[i]) != VK_SUCCESS)
+		{
+			throw std::runtime_error("Faild to create image views!");
+		}
+
+	}
 }
 
 //Configures the debug messaging system

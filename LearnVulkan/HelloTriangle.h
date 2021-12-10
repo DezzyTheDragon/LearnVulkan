@@ -58,6 +58,7 @@ private:
 	VkPresentModeKHR choseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes);
 	VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities);
 
+	void createImageViews();
 
 	//TODO: move messenger functions to their own class to avoid having to rewrite this long mess
 
@@ -94,7 +95,8 @@ private:
 	std::vector<VkImage> m_swapChainImages;
 	VkFormat m_swapChainImageFormat;
 	VkExtent2D m_swapChainExtent;
-
+	
+	std::vector<VkImageView> m_swapChainImageViews;
 
 	//Only have validation layers enabled for debug builds
 #ifdef NDEBUG
