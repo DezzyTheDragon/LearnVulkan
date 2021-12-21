@@ -6,7 +6,7 @@
 #include <GLFW/glfw3.h>
 #include <vector>
 #include <optional>		//NOTE: optional was added in C++17
-
+#include <string>
 
 struct QueueFamilyIndices
 {
@@ -73,6 +73,11 @@ private:
 	void DestroyDebugUtilsMessegerEXT(VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger, const VkAllocationCallbacks* pAllocator);
 	void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& createInfo);
 	
+	void createGraphicsPipeline();
+	VkShaderModule createShaderModule(const std::vector<char>& code);
+	static std::vector<char> ReadFile(const std::string& filename);
+
+	void createRenderPass();
 
 	GLFWwindow* m_window;
 	VkInstance m_instance;
@@ -97,6 +102,10 @@ private:
 	VkExtent2D m_swapChainExtent;
 	
 	std::vector<VkImageView> m_swapChainImageViews;
+
+	VkPipelineLayout m_pipelineLayout;
+	VkRenderPass m_renderPass;
+	VkPipeline m_graphicsPipeline;
 
 	//Only have validation layers enabled for debug builds
 #ifdef NDEBUG

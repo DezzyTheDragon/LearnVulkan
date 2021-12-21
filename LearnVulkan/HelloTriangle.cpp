@@ -5,6 +5,7 @@
 #include <set>
 #include <cstdint>
 #include <algorithm>
+#include <fstream>
 
 //VkSurfaceKHR m_surface;
 
@@ -38,6 +39,8 @@ void HelloTriangle::initVulkan()
 	createLogicalDevice();
 	createSwapChain();
 	createImageViews();
+	createRenderPass();
+	createGraphicsPipeline();
 }
 
 void HelloTriangle::createSurface()
@@ -104,6 +107,10 @@ void HelloTriangle::cleanUp()
 	{
 		vkDestroyImageView(m_device, imageView, nullptr);
 	}
+
+	vkDestroyPipeline(m_device, m_graphicsPipeline, nullptr);
+	vkDestroyPipelineLayout(m_device, m_pipelineLayout, nullptr);
+	vkDestroyRenderPass(m_device, m_renderPass, nullptr);
 
 	vkDestroySwapchainKHR(m_device, m_swapChain, nullptr);
 
@@ -662,6 +669,8 @@ VKAPI_ATTR VkBool32 VKAPI_CALL HelloTriangle::debugCallback(
 	return VK_FALSE;
 }
 
+
+
 //Create a custum debug messenger
 VkResult HelloTriangle::CreateDebugUtilsMessegerEXT(VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pDebugMessenger)
 {
@@ -699,4 +708,250 @@ void HelloTriangle::populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreate
 	createInfo.messageSeverity = m_dbgmsg_msgseverity;
 	createInfo.messageType = m_dbgmsg_msgtype;
 	createInfo.pfnUserCallback = debugCallback;
+}
+
+void HelloTriangle::createGraphicsPipeline()
+{
+
+	auto vertShaderCode = ReadFile("..\\shaders\\vert.spv");
+	auto fragShaderCode = ReadFile("..\\shaders\\frag.spv");
+
+	VkShaderModule vertShaderModule = createShaderModule(vertShaderCode);
+	VkShaderModule fragShaderModule = createShaderModule(fragShaderCode);
+
+	//Create info for the vertex shader
+	VkPipelineShaderStageCreateInfo vertShaderCreateInfo{};
+	vertShaderCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+	//Specify what stage in the graphics pipline this will go
+	vertShaderCreateInfo.stage = VK_SHADER_STAGE_VERTEX_BIT;
+	//Specify the code that will go into the structure and the entry point of the shader program
+	vertShaderCreateInfo.module = vertShaderModule;
+	vertShaderCreateInfo.pName = "main";
+
+	//Create info for the fragment shader
+	//Code is identical to the vertext shader structure
+	VkPipelineShaderStageCreateInfo fragShaderCreateInfo{};
+	fragShaderCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+	fragShaderCreateInfo.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
+	fragShaderCreateInfo.module = fragShaderModule;
+	fragShaderCreateInfo.pName = "main";
+
+	//Array to hold the stages to use for the actual creation of the pipeline
+	VkPipelineShaderStageCreateInfo shaderStages[] = { vertShaderCreateInfo, fragShaderCreateInfo };
+
+	//Because the vertex data is hard coded into the shader we are going to say there is no vertex data for now
+	VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
+	vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
+	vertexInputInfo.vertexBindingDescriptionCount = 0;
+	vertexInputInfo.pVertexBindingDescriptions = nullptr;
+	vertexInputInfo.vertexAttributeDescriptionCount = 0;
+	vertexInputInfo.pVertexAttributeDescriptions = nullptr;
+
+	//Input assembly structure
+	VkPipelineInputAssemblyStateCreateInfo inputAssembly{};
+	inputAssembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
+	inputAssembly.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+	inputAssembly.primitiveRestartEnable = VK_FALSE;
+
+	//Create viewport structure
+	//Viewport specifies where the output will go and the transformation of the buffer to the output
+	//Here we go from 0, 0 to width, height
+	VkViewport viewport{};
+	viewport.x = 0.0f;
+	viewport.y = 0.0f;
+	viewport.width = (float)m_swapChainExtent.width;
+	viewport.height = (float)m_swapChainExtent.height;
+	viewport.minDepth = 0.0f;
+	viewport.maxDepth = 1.0f;
+
+	//Create the Scissor rectangle
+	//Scissor is determins where pixels will be stored, anything outside will be ignored
+	//In this case we want to render everything
+	VkRect2D scissor{};
+	scissor.offset = {0, 0};
+	scissor.extent = m_swapChainExtent;
+
+	//Put the viewport and the scissor together
+	VkPipelineViewportStateCreateInfo viewportState{};
+	viewportState.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
+	viewportState.viewportCount = 1;
+	viewportState.pViewports = &viewport;
+	viewportState.scissorCount = 1;
+	viewportState.pScissors = &scissor;
+
+	//Create Rasterizer
+	VkPipelineRasterizationStateCreateInfo rasterizer{};
+	rasterizer.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
+	rasterizer.depthClampEnable = VK_FALSE;
+	rasterizer.rasterizerDiscardEnable = VK_FALSE;
+	rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
+	rasterizer.lineWidth = 1.0f;
+	rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
+	rasterizer.frontFace = VK_FRONT_FACE_CLOCKWISE;
+	rasterizer.depthBiasEnable = VK_FALSE;
+	rasterizer.depthBiasConstantFactor = 0.0f;
+	rasterizer.depthBiasClamp = 0.0f;
+	rasterizer.depthBiasSlopeFactor = 0.0f;
+
+	//Create multisampling
+	//For simplicity we will leave it disabled
+	VkPipelineMultisampleStateCreateInfo multisampling{};
+	multisampling.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
+	multisampling.sampleShadingEnable = VK_FALSE;
+	multisampling.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
+	multisampling.minSampleShading = 1.0f;
+	multisampling.pSampleMask = nullptr;
+	multisampling.alphaToCoverageEnable = VK_FALSE;
+	multisampling.alphaToOneEnable = VK_FALSE;
+
+	//We do not have any stencil buffers so we will just pass a nullptr
+
+	//Create color blend
+	VkPipelineColorBlendAttachmentState colorBlendAttachment{};
+	colorBlendAttachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
+	//Basic color blending
+	colorBlendAttachment.blendEnable = VK_TRUE;
+	colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
+	colorBlendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
+	colorBlendAttachment.colorBlendOp = VK_BLEND_OP_ADD;
+	colorBlendAttachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
+	colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
+	colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD;
+
+	VkPipelineColorBlendStateCreateInfo colorBlending{};
+	colorBlending.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
+	colorBlending.logicOpEnable = VK_FALSE;
+	colorBlending.logicOp = VK_LOGIC_OP_COPY;
+	colorBlending.attachmentCount = 1;
+	colorBlending.pAttachments = &colorBlendAttachment;
+	
+	//We do not have any dynamic states so we will have to use nullptr
+
+	//Create the pipeline layout
+	VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
+	pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+	pipelineLayoutInfo.setLayoutCount = 0;
+	pipelineLayoutInfo.pSetLayouts = nullptr;
+	pipelineLayoutInfo.pushConstantRangeCount = 0;
+	pipelineLayoutInfo.pPushConstantRanges = nullptr;
+
+	if (vkCreatePipelineLayout(m_device, &pipelineLayoutInfo, nullptr, &m_pipelineLayout) != VK_SUCCESS)
+	{
+		throw std::runtime_error("Failed to create graphics pipeline");
+	}
+
+	VkGraphicsPipelineCreateInfo pipelineInfo{};
+	pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
+	pipelineInfo.stageCount = 2;
+	pipelineInfo.pStages = shaderStages;
+	//Reference all the things we have created
+	pipelineInfo.pVertexInputState = &vertexInputInfo;
+	pipelineInfo.pInputAssemblyState = &inputAssembly;
+	pipelineInfo.pViewportState = &viewportState;
+	pipelineInfo.pRasterizationState = &rasterizer;
+	pipelineInfo.pMultisampleState = &multisampling;
+	pipelineInfo.pDepthStencilState = nullptr;
+	pipelineInfo.pColorBlendState = &colorBlending;
+	pipelineInfo.pDynamicState = nullptr;
+	pipelineInfo.layout = m_pipelineLayout;
+	pipelineInfo.renderPass = m_renderPass;
+	pipelineInfo.subpass = 0;
+	pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
+	pipelineInfo.basePipelineIndex = -1;
+
+	if (vkCreateGraphicsPipelines(m_device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &m_graphicsPipeline) != VK_SUCCESS)
+	{
+		throw std::runtime_error("Could not create graphics pipeline!");
+	}
+
+
+
+	//We don't need the modules after the pipeline is finished and sent to the gpu so we can get rid of those here
+	vkDestroyShaderModule(m_device, fragShaderModule, nullptr);
+	vkDestroyShaderModule(m_device, vertShaderModule, nullptr);
+
+}
+
+//Read in file
+std::vector<char> HelloTriangle::ReadFile(const std::string& filename)
+//static std::vector<char> ReadFile(const std::string& filename)
+{
+	//ate = start reading at the end of the file | binary = the file is binary
+	//reason for start reading at the end of the file is it lets us easily figure out
+	//how big the file is and allocate enough room
+	std::ifstream file(filename, std::ios::ate | std::ios::binary);
+
+	if (!file.is_open())
+	{
+		throw std::runtime_error("Failed to open file: " + filename);
+	}
+
+	//allocate enough room in the buffer to hold the file
+	size_t fileSize = (size_t)file.tellg();
+	std::vector<char> buffer(fileSize);
+
+	//Move to the beginning of the file to start reading
+	file.seekg(0);
+	file.read(buffer.data(), fileSize);
+
+	file.close();
+
+	return buffer;	
+}
+
+void HelloTriangle::createRenderPass()
+{
+	//single color buffer
+	VkAttachmentDescription colorAttachment{};
+	colorAttachment.format = m_swapChainImageFormat;
+	colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
+	colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+	colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+	colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+	colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+	colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+	colorAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+
+	//sub pass
+	VkAttachmentReference colorAttachmentRef{};
+	colorAttachmentRef.attachment = 0;
+	colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
+	VkSubpassDescription subpass{};
+	subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+	subpass.colorAttachmentCount = 1;
+	subpass.pColorAttachments = &colorAttachmentRef;
+
+
+	//Create render pass
+	VkRenderPassCreateInfo renderPassInfo{};
+	renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+	renderPassInfo.attachmentCount = 1;
+	renderPassInfo.pAttachments = &colorAttachment;
+	renderPassInfo.subpassCount = 1;
+	renderPassInfo.pSubpasses = &subpass;
+
+	if (vkCreateRenderPass(m_device, &renderPassInfo, nullptr, &m_renderPass) != VK_SUCCESS)
+	{
+		throw std::runtime_error("Could not create render pass");
+	}
+}
+
+VkShaderModule HelloTriangle::createShaderModule(const std::vector<char>& code)
+{
+	VkShaderModuleCreateInfo createInfo{};
+	createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+	createInfo.codeSize = code.size();
+	//The bytecode requires bytes but uses a uint32_t pointer rather than a char pointer
+	//so we need to recast it to a uint32_t and becuase its in a vector we do not
+	//need to worry about things not lining up
+	createInfo.pCode = reinterpret_cast<const uint32_t*>(code.data());
+
+	VkShaderModule shaderModule;
+	if (vkCreateShaderModule(m_device, &createInfo, nullptr, &shaderModule) != VK_SUCCESS)
+	{
+		throw std::runtime_error("Failed to create shader module");
+	}
+
+	return shaderModule;
 }
