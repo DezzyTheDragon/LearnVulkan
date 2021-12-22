@@ -60,6 +60,8 @@ private:
 
 	void createImageViews();
 
+	void createFrameBuffer();
+
 	//TODO: move messenger functions to their own class to avoid having to rewrite this long mess
 
 	std::vector<const char*> getRequiredExtensions();
@@ -78,6 +80,13 @@ private:
 	static std::vector<char> ReadFile(const std::string& filename);
 
 	void createRenderPass();
+
+	void createCommandPool();
+	void createCommandBuffers();
+
+	void drawFrame();
+
+	void createSemephores();
 
 	GLFWwindow* m_window;
 	VkInstance m_instance;
@@ -102,10 +111,17 @@ private:
 	VkExtent2D m_swapChainExtent;
 	
 	std::vector<VkImageView> m_swapChainImageViews;
+	std::vector<VkFramebuffer> m_swapChainFramebuffers;
 
 	VkPipelineLayout m_pipelineLayout;
 	VkRenderPass m_renderPass;
 	VkPipeline m_graphicsPipeline;
+
+	VkCommandPool m_commandPool;
+	std::vector<VkCommandBuffer> m_commandBuffers;
+
+	VkSemaphore m_imageAvailableSemaphore;
+	VkSemaphore m_renderFinishedSemephore;
 
 	//Only have validation layers enabled for debug builds
 #ifdef NDEBUG
