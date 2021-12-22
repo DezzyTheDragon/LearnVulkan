@@ -86,7 +86,7 @@ private:
 
 	void drawFrame();
 
-	void createSemephores();
+	void createSyncObjects();
 
 	GLFWwindow* m_window;
 	VkInstance m_instance;
@@ -120,8 +120,16 @@ private:
 	VkCommandPool m_commandPool;
 	std::vector<VkCommandBuffer> m_commandBuffers;
 
-	VkSemaphore m_imageAvailableSemaphore;
-	VkSemaphore m_renderFinishedSemephore;
+	//VkSemaphore m_imageAvailableSemaphore;
+	//VkSemaphore m_renderFinishedSemephore;
+
+	std::vector<VkSemaphore> m_imageAvailableSemaphores;
+	std::vector<VkSemaphore> m_renderFinishedSemaphores;
+	std::vector<VkFence> m_inFlightFences;
+	std::vector<VkFence> m_imagesInFlight;
+
+	const int MAX_FRAMES_IN_FLIGHT = 2;
+	size_t currentFrame = 0;
 
 	//Only have validation layers enabled for debug builds
 #ifdef NDEBUG

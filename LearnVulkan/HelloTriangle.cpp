@@ -44,7 +44,7 @@ void HelloTriangle::initVulkan()
 	createFrameBuffer();
 	createCommandPool();
 	createCommandBuffers();
-	createSemephores();
+	createSyncObjects();
 }
 
 void HelloTriangle::createSurface()
@@ -122,8 +122,12 @@ void HelloTriangle::cleanUp()
 		vkDestroyImageView(m_device, imageView, nullptr);
 	}
 
-	vkDestroySemaphore(m_device, m_renderFinishedSemephore, nullptr);
-	vkDestroySemaphore(m_device, m_imageAvailableSemaphore, nullptr);
+	for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+	{
+		vkDestroySemaphore(m_device, m_renderFinishedSemaphores[i], nullptr);
+		vkDestroySemaphore(m_device, m_imageAvailableSemaphores[i], nullptr);
+		vkDestroyFence(m_device, m_inFlightFences[i], nullptr);
+	}
 
 	vkDestroyCommandPool(m_device, m_commandPool, nullptr);
 
@@ -1082,14 +1086,23 @@ void HelloTriangle::createCommandBuffers()
 
 void HelloTriangle::drawFrame()
 {
+	vkWaitForFences(m_device, 1, &m_inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
+
 	//Acuire an image from the swap chain
 	uint32_t imageIndex;
-	vkAcquireNextImageKHR(m_device, m_swapChain, UINT64_MAX, m_imageAvailableSemaphore, VK_NULL_HANDLE, &imageIndex);
+	vkAcquireNextImageKHR(m_device, m_swapChain, UINT64_MAX, m_imageAvailableSemaphores[currentFrame], VK_NULL_HANDLE, &imageIndex);
+
+	vkResetFences(m_device, 1, &m_inFlightFences[currentFrame]);
+	if (m_imagesInFlight[imageIndex] != VK_NULL_HANDLE)
+	{
+		vkWaitForFences(m_device, 1, &m_imagesInFlight[imageIndex], VK_TRUE, UINT64_MAX);
+	}
+	m_imagesInFlight[imageIndex] = m_inFlightFences[currentFrame];
 
 	VkSubmitInfo submitInfo{};
 	submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
-	VkSemaphore waitSemaphores[] = { m_imageAvailableSemaphore };
+	VkSemaphore waitSemaphores[] = { m_imageAvailableSemaphores[currentFrame] };
 	VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
 	submitInfo.waitSemaphoreCount = 1;
 	submitInfo.pWaitSemaphores = waitSemaphores;
@@ -1097,11 +1110,11 @@ void HelloTriangle::drawFrame()
 	submitInfo.commandBufferCount = 1;
 	submitInfo.pCommandBuffers = &m_commandBuffers[imageIndex];
 
-	VkSemaphore signalSemaphores[] = { m_renderFinishedSemephore };
+	VkSemaphore signalSemaphores[] = { m_renderFinishedSemaphores[currentFrame] };
 	submitInfo.signalSemaphoreCount = 1;
 	submitInfo.pSignalSemaphores = signalSemaphores;
 
-	if (vkQueueSubmit(m_graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE) != VK_SUCCESS)
+	if (vkQueueSubmit(m_graphicsQueue, 1, &submitInfo, m_inFlightFences[currentFrame]) != VK_SUCCESS)
 	{
 		throw std::runtime_error("Failed to submip draw command buffer");
 	}
@@ -1119,15 +1132,34 @@ void HelloTriangle::drawFrame()
 	presentInfo.pResults = nullptr;
 
 	vkQueuePresentKHR(m_presentQueue, &presentInfo);
+	currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
 }
 
-void HelloTriangle::createSemephores()
+void HelloTriangle::createSyncObjects()
 {
 	//We need to use semephores to syncronize function calls to ensure the finish as expected in the correct order
+	
+	m_imageAvailableSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
+	m_renderFinishedSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
+	m_inFlightFences.resize(MAX_FRAMES_IN_FLIGHT);
+	m_imagesInFlight.resize(m_swapChainImages.size(), VK_NULL_HANDLE);
+
 	VkSemaphoreCreateInfo semephoreInfo{};
 	semephoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
-	if (vkCreateSemaphore(m_device, &semephoreInfo, nullptr, &m_imageAvailableSemaphore) != VK_SUCCESS || vkCreateSemaphore(m_device, &semephoreInfo, nullptr, &m_renderFinishedSemephore) != VK_SUCCESS)
+	
+	VkFenceCreateInfo fenceInfo{};
+	fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+	fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
+
+	for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
 	{
-		throw std::runtime_error("Failed to create semephore");
+		if (vkCreateSemaphore(m_device, &semephoreInfo, nullptr, &m_imageAvailableSemaphores[i]) != VK_SUCCESS || 
+			vkCreateSemaphore(m_device, &semephoreInfo, nullptr, &m_renderFinishedSemaphores[i]) != VK_SUCCESS ||
+			vkCreateFence(m_device, &fenceInfo, nullptr, &m_inFlightFences[i]) != VK_SUCCESS)
+		{
+			throw std::runtime_error("Failed to create sync objects");
+		}
+
 	}
+	
 }
