@@ -44,6 +44,8 @@ private:
 	void createInstance();
 	bool checkValidationLayerSupport();
 	
+	static void frameBufferSizeCallback(GLFWwindow* window, int width, int height);
+
 	void pickPhysicalDevice();
 	bool isDeviceSuitable(VkPhysicalDevice device);
 	bool checkDeviceExtensionSupport(VkPhysicalDevice device);
@@ -57,6 +59,9 @@ private:
 	VkSurfaceFormatKHR choseSwapChainSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats);
 	VkPresentModeKHR choseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes);
 	VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities);
+
+	void recreateSwapchain();
+	void cleanupSwapchain();
 
 	void createImageViews();
 
@@ -130,6 +135,8 @@ private:
 
 	const int MAX_FRAMES_IN_FLIGHT = 2;
 	size_t currentFrame = 0;
+
+	bool m_framebufferResized = false;
 
 	//Only have validation layers enabled for debug builds
 #ifdef NDEBUG

@@ -9,6 +9,7 @@
 #include <crtdbg.h>
 
 #include "HelloTriangle.h"
+#include "HelloTriangle/HelloTriangleMain.h"
 
 int main()
 {
@@ -16,7 +17,8 @@ int main()
 	_CrtSetReportMode(_CRT_WARN, _CRTDBG_MODE_DEBUG);
 
 
-	HelloTriangle ht;
+	//HelloTriangle ht;
+	HelloTriangleMain ht;
 
 	try
 	{
