@@ -1,6 +1,7 @@
+#pragma once
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
-#include "InitVulkan.h"
+#include "VulkanInstance.h"
 
 class HelloTriangleMain
 {
@@ -15,9 +16,7 @@ private:
 
 	//Class members
 	GLFWwindow* m_window;	//Holds the reference to the glfw window
-	VkInstance m_instance;	//Holds the vulkan instance for further use
-
-	InitVulkan ht_initVulkan;	//object reference for the init vulkan class
+	VulkanInstance* ht_vkInstance;
 
 	//Const Values
 	const uint32_t WIDTH = 800;		//Const values for window size

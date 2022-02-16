@@ -1,10 +1,14 @@
 #include "HelloTriangleMain.h"
 //#include "InitVulkan.h"
 
+//Default constructor
 HelloTriangleMain::HelloTriangleMain()
 {
+	ht_vkInstance = nullptr;
+	m_window = nullptr;
 }
 
+//The real start of the render application
 void HelloTriangleMain::run()
 {
 	initWindow();
@@ -28,10 +32,9 @@ void HelloTriangleMain::initWindow()
 }
 
 //Initilize Vulkan
-//Offload this into its own class
 void HelloTriangleMain::initVulkan()
 {
-	ht_initVulkan = InitVulkan(&m_instance);
+	ht_vkInstance = new VulkanInstance();
 }
 
 //The main loop of the program
@@ -50,12 +53,12 @@ void HelloTriangleMain::mainLoop()
 //TODO: create a class for automatic memory management (Consider RAII) 
 void HelloTriangleMain::cleanup()
 {
-	//Clean up vulkan instance
-	ht_initVulkan.cleanup();
+	//Delete and destroy VulkanInstance
+	delete ht_vkInstance;
 
 	//Destroy the glfw window
 	glfwDestroyWindow(m_window);
-
-	//Uninitilize the glfw library
+	
+	//Terminate glfw, must happen after all the other glfw objects have been cleaned
 	glfwTerminate();
 }
