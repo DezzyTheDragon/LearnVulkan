@@ -2,6 +2,7 @@
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 #include "ValidationLayers.h"
+#include "PhysicalDevice.h"
 
 /*	The purpos of this class is to create the vulkan instance
 *	It will be responsible for creating the instance itself and
@@ -32,6 +33,8 @@ private:
 	void CheckExtensions();
 
 	//member variables
-	VkInstance m_instance;		//The vulkan instance
-	ValidationLayers* m_validationLayers;		//Keep track of the validation layer object
+	VkInstance m_instance;						//The vulkan instance
+	//Pointers to other objects
+	ValidationLayers* m_validationLayers;
+	PhysicalDevice* m_physicalDevice;
 };

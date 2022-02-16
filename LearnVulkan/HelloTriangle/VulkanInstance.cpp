@@ -11,6 +11,7 @@ VulkanInstance::VulkanInstance()
 	m_validationLayers = new ValidationLayers();
 	CreateInstance();
 	m_validationLayers->SetupDebugMessenger();
+	m_physicalDevice = new PhysicalDevice(m_instance);
 }
 
 //Deconstructor
@@ -19,6 +20,7 @@ VulkanInstance::VulkanInstance()
 VulkanInstance::~VulkanInstance()
 {
 	delete m_validationLayers;
+	delete m_physicalDevice;
 
 	//Vulkan instance should be the last thing that is destroyed
 	vkDestroyInstance(m_instance, nullptr);

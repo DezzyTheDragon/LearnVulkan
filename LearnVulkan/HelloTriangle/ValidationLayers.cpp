@@ -30,6 +30,13 @@ bool ValidationLayers::GetEnableValidation()
 	return enableValidationLayers;
 }
 
+/*	The vulkan instance is needed for construction and
+*	destruction, but at the time of object creation the
+*	instance is not ready so it needs to be set at a
+*	later time
+*/
+
+//Setter for the vulkan instance
 void ValidationLayers::SetVulkanInstance(VkInstance inst)
 {
 	m_instance = inst;
