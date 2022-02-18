@@ -1,3 +1,4 @@
+/*
 #pragma once
 #define GLFW_INCLUDE_VULKAN
 #define DEBUG_NEW new(__FILE__, __LINE__)
@@ -161,3 +162,4 @@ private:
 
 };
 
+*/

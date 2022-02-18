@@ -1,6 +1,8 @@
+#pragma once
 #include "PhysicalDevice.h"
 #include <stdexcept>
 #include <vector>
+
 
 PhysicalDevice::PhysicalDevice(VkInstance inst)
 {

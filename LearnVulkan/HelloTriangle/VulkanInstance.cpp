@@ -1,3 +1,4 @@
+#pragma once
 #include "VulkanInstance.h"
 #include <stdexcept>
 #include <vector>

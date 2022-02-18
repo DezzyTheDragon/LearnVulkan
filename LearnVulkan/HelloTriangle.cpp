@@ -1,3 +1,4 @@
+/*
 #include "HelloTriangle.h"
 #include <stdexcept>
 #include <iostream>
@@ -82,7 +83,7 @@ void HelloTriangle::setupDebugMessenger()
 							 VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
 	createInfo.pfnUserCallback = debugCallback;
 	createInfo.pUserData = nullptr;
-	*/
+	
 
 	//TODO: Figure out how to either scope the VkResult or change the enum class to an enum
 	if (CreateDebugUtilsMessegerEXT(m_instance, &createInfo, nullptr, &m_debugMessager) != VK_SUCCESS)
@@ -135,12 +136,12 @@ void HelloTriangle::cleanUp()
 	/*for (auto framebuffer : m_swapChainFramebuffers)
 	{
 		vkDestroyFramebuffer(m_device, framebuffer, nullptr);
-	}*/
+	}
 
 	/*for (auto imageView : m_swapChainImageViews)
 	{
 		vkDestroyImageView(m_device, imageView, nullptr);
-	}*/
+	}
 
 
 
@@ -348,7 +349,7 @@ void HelloTriangle::createLogicalDevice()
 	queueCreateInfo.queueCount = 1;
 	float queuePriority = 1.0f;
 	queueCreateInfo.pQueuePriorities = &queuePriority;
-	*/
+	
 	std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
 	std::set<uint32_t> uniqueQueueFamilies = {indices.graphicsFamily.value(), indices.presentFamily.value()};
 	float queuePriority = 1.0f;
@@ -1236,3 +1237,4 @@ void HelloTriangle::createSyncObjects()
 	}
 	
 }
+*/
