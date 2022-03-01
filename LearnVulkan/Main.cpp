@@ -8,7 +8,7 @@
 #include <stdlib.h>
 #include <crtdbg.h>
 
-#include "HelloTriangle.h"
+//#include "HelloTriangle.h"
 #include "HelloTriangle/HelloTriangleMain.h"
 
 int main()

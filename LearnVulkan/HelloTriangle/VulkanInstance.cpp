@@ -6,13 +6,19 @@
 
 //Constructor for the class
 //The Constructor will go through and create and set everything up
-VulkanInstance::VulkanInstance()
+VulkanInstance::VulkanInstance(GLFWwindow* window)
 {
+	//var setup
 	m_instance = nullptr;
 	m_validationLayers = new ValidationLayers();
+	m_window = window;
+	//vulkan setup routine
 	CreateInstance();
 	m_validationLayers->SetupDebugMessenger();
-	m_physicalDevice = new PhysicalDevice(m_instance);
+	//surface can influince the device query and must be run first
+	m_surface = new VulkanSurface(m_instance, m_window);
+	m_physicalDevice = new PhysicalDevice(m_instance, m_validationLayers->GetEnableValidation(), 
+				m_validationLayers->GetValidationLayers(), m_surface->GetSurface());
 }
 
 //Deconstructor
@@ -20,9 +26,9 @@ VulkanInstance::VulkanInstance()
 //before this object gets deleted
 VulkanInstance::~VulkanInstance()
 {
-	delete m_validationLayers;
 	delete m_physicalDevice;
-
+	delete m_validationLayers;
+	delete m_surface;
 	//Vulkan instance should be the last thing that is destroyed
 	vkDestroyInstance(m_instance, nullptr);
 }

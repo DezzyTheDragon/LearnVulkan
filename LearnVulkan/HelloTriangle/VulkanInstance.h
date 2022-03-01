@@ -3,8 +3,9 @@
 #include <GLFW/glfw3.h>
 #include "ValidationLayers.h"
 #include "PhysicalDevice.h"
+#include "VulkanSurface.h"
 
-/*	The purpos of this class is to create the vulkan instance
+/*	The purpose of this class is to create the vulkan instance
 *	It will be responsible for creating the instance itself and
 *	initializing the needed resources to get it to work
 * 
@@ -25,7 +26,7 @@
 class VulkanInstance
 {
 public:
-	VulkanInstance();
+	VulkanInstance(GLFWwindow* window);
 	~VulkanInstance();
 	VkInstance GetInstance();
 private:
@@ -34,7 +35,9 @@ private:
 
 	//member variables
 	VkInstance m_instance;						//The vulkan instance
+	GLFWwindow* m_window;
 	//Pointers to other objects
 	ValidationLayers* m_validationLayers;
 	PhysicalDevice* m_physicalDevice;
+	VulkanSurface* m_surface;
 };

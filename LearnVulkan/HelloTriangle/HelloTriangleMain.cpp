@@ -34,7 +34,7 @@ void HelloTriangleMain::initWindow()
 //Initilize Vulkan
 void HelloTriangleMain::initVulkan()
 {
-	ht_vkInstance = new VulkanInstance();
+	ht_vkInstance = new VulkanInstance(m_window);
 }
 
 //The main loop of the program
