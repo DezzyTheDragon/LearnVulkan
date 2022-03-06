@@ -18,6 +18,7 @@ private:
 	GLFWwindow* m_window;	//Holds the reference to the glfw window
 	VulkanInstance* ht_vkInstance;
 
+
 	//Const Values
 	const uint32_t WIDTH = 800;		//Const values for window size
 	const uint32_t HEIGHT = 600;	//Const values for window size

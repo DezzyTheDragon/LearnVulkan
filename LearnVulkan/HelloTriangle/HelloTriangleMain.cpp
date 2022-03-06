@@ -1,5 +1,9 @@
 #include "HelloTriangleMain.h"
+#include "VulkanGlobal.h"
+
 //#include "InitVulkan.h"
+
+GLFWwindow* g_window;
 
 //Default constructor
 HelloTriangleMain::HelloTriangleMain()
@@ -28,13 +32,14 @@ void HelloTriangleMain::initWindow()
 	//Vulkan is picky with resizing needing swapchains and presentations to be remade, so it will be disabled for now
 	glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 	//glfwCreateWindow | width, height, title, window monitor, Ignore because its openGL specific
-	m_window = glfwCreateWindow(WIDTH, HEIGHT, "Vulkan", nullptr, nullptr);
+	//m_window = glfwCreateWindow(WIDTH, HEIGHT, "Vulkan", nullptr, nullptr);
+	g_window = glfwCreateWindow(WIDTH, HEIGHT, "Vulkan", nullptr, nullptr);
 }
 
 //Initilize Vulkan
 void HelloTriangleMain::initVulkan()
 {
-	ht_vkInstance = new VulkanInstance(m_window);
+	ht_vkInstance = new VulkanInstance();
 }
 
 //The main loop of the program
@@ -42,7 +47,7 @@ void HelloTriangleMain::initVulkan()
 void HelloTriangleMain::mainLoop()
 {
 	//Keep the application running untill the window closes or an error occors
-	while (!glfwWindowShouldClose(m_window))
+	while (!glfwWindowShouldClose(g_window))
 	{
 		glfwPollEvents();
 	}

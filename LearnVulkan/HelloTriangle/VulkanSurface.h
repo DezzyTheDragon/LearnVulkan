@@ -15,14 +15,14 @@
 class VulkanSurface
 {
 public:
-	VulkanSurface(VkInstance inst, GLFWwindow* window);
+	VulkanSurface();
 	~VulkanSurface();
 	VkSurfaceKHR GetSurface();
 private:
 	void CreateSurface();
 	//member variables
 	VkSurfaceKHR m_surface;
-	GLFWwindow* m_window;
-	VkInstance m_instance;
+	//GLFWwindow* m_window;
+	//VkInstance m_instance;
 
 };

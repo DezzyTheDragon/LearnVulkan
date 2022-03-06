@@ -1,16 +1,17 @@
 #include "VulkanSurface.h"
+#include "VulkanGlobal.h"
 #include <stdexcept>
 
-VulkanSurface::VulkanSurface(VkInstance inst, GLFWwindow* window)
+VulkanSurface::VulkanSurface()
 {
-	m_window = window;
-	m_instance = inst;
+	//m_window = window;
+	//m_instance = inst;
 	CreateSurface();
 }
 
 VulkanSurface::~VulkanSurface()
 {
-	vkDestroySurfaceKHR(m_instance, m_surface, nullptr);
+	vkDestroySurfaceKHR(g_vkInstance, m_surface, nullptr);
 }
 
 VkSurfaceKHR VulkanSurface::GetSurface()
@@ -23,7 +24,7 @@ VkSurfaceKHR VulkanSurface::GetSurface()
 void VulkanSurface::CreateSurface()
 {
 	//TODO: enum class prefered over enum
-	if (glfwCreateWindowSurface(m_instance, m_window, nullptr, &m_surface) != VK_SUCCESS)
+	if (glfwCreateWindowSurface(g_vkInstance, g_window, nullptr, &m_surface) != VK_SUCCESS)
 	{
 		throw std::runtime_error("VulkanSurface: failed to create windows surface");
 	}

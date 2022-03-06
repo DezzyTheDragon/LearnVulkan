@@ -1,4 +1,5 @@
 #include "ValidationLayers.h"
+#include "VulkanGlobal.h"
 #include <cstring>
 #include <stdexcept>
 #include <iostream>
@@ -8,7 +9,7 @@
 ValidationLayers::ValidationLayers()
 {
 	m_debugMessenger = nullptr;
-	m_instance = nullptr;
+	//m_instance = nullptr;
 	if (enableValidationLayers && !CheckValidationLayerSupport())
 	{
 		throw std::runtime_error("ValidationLayers: Validation layers requested were not available");
@@ -20,7 +21,7 @@ ValidationLayers::~ValidationLayers()
 {
 	if (enableValidationLayers)
 	{
-		DestroyDebugUtilsMessengerEXT(m_instance, m_debugMessenger, nullptr);
+		DestroyDebugUtilsMessengerEXT(g_vkInstance, m_debugMessenger, nullptr);
 	}
 }
 
@@ -37,10 +38,10 @@ bool ValidationLayers::GetEnableValidation()
 */
 
 //Setter for the vulkan instance
-void ValidationLayers::SetVulkanInstance(VkInstance inst)
-{
-	m_instance = inst;
-}
+//void ValidationLayers::SetVulkanInstance(VkInstance inst)
+//{
+//	m_instance = inst;
+//}
 
 VkDebugUtilsMessengerEXT ValidationLayers::GetDebugInstance()
 {
@@ -94,7 +95,7 @@ void ValidationLayers::SetupDebugMessenger()
 	
 
 	//TODO: prefer enum class over enum
-	if (CreateDebugUtilsMessengerEXT(m_instance, &createInfo, nullptr, &m_debugMessenger) != VK_SUCCESS)
+	if (CreateDebugUtilsMessengerEXT(g_vkInstance, &createInfo, nullptr, &m_debugMessenger) != VK_SUCCESS)
 	{
 		throw std::runtime_error("ValidationLayers: failed to setup debug messenger");
 	}

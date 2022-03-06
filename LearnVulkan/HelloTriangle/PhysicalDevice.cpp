@@ -1,18 +1,18 @@
 #pragma once
 #include "PhysicalDevice.h"
+#include "VulkanGlobal.h"
 #include <stdexcept>
 #include <set>
 
 
-PhysicalDevice::PhysicalDevice(VkInstance inst, bool validation, 
-								std::vector<const char*> validationLayers, VkSurfaceKHR surface,
-								GLFWwindow *window)
+PhysicalDevice::PhysicalDevice(bool validation, 
+								std::vector<const char*> validationLayers, VkSurfaceKHR surface)
 {
-	m_instance = inst;
+	//m_instance = inst;
 	m_validationEnabled = validation;
 	m_validationLayers = validationLayers;
 	m_surface = surface;
-	m_swapChain = new VulkanSwapChain(surface, window);
+	m_swapChain = new VulkanSwapChain(surface);
 	PickPhysicalDevice();
 	CreateLogicalDevice();
 	m_swapChain->SetLogicalDevice(m_logicalDevice);
@@ -46,7 +46,7 @@ void PhysicalDevice::PickPhysicalDevice()
 {
 	uint32_t deviceCount = 0;
 	//TODO: prefer enum class over enum
-	vkEnumeratePhysicalDevices(m_instance, &deviceCount, nullptr);
+	vkEnumeratePhysicalDevices(g_vkInstance, &deviceCount, nullptr);
 
 	//Check to make sure that there are devices that we can use
 	if (deviceCount == 0)
@@ -57,7 +57,7 @@ void PhysicalDevice::PickPhysicalDevice()
 
 	//Create a list containing valid devices
 	std::vector<VkPhysicalDevice> devices(deviceCount);
-	vkEnumeratePhysicalDevices(m_instance, &deviceCount, devices.data());
+	vkEnumeratePhysicalDevices(g_vkInstance, &deviceCount, devices.data());
 
 	//TODO: rank all the devices and select the best one
 	

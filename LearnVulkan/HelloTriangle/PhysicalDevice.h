@@ -20,9 +20,8 @@ class PhysicalDevice
 {
 public:
 	//Class c'tor, d'tor, etc
-	PhysicalDevice(VkInstance inst, bool validation, 
-					std::vector<const char*> validationLayers, VkSurfaceKHR surface, 
-					GLFWwindow *window);
+	PhysicalDevice(bool validation, 
+					std::vector<const char*> validationLayers, VkSurfaceKHR surface);
 	~PhysicalDevice();
 	//Class Getters
 	VkPhysicalDevice GetPhysicalDevice();
@@ -37,7 +36,7 @@ private:
 	bool CheckDeviceExtensions(VkPhysicalDevice device);
 	QueueFamilyIndices FindQueueFamilies(VkPhysicalDevice device);
 	//member variables
-	VkInstance m_instance;
+	//VkInstance m_instance;
 	VkSurfaceKHR m_surface;
 	VkPhysicalDevice m_physicalDevice = VK_NULL_HANDLE;
 	VulkanSwapChain* m_swapChain;

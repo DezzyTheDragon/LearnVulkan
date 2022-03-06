@@ -1,14 +1,15 @@
 #include "VulkanSwapChain.h"
+#include "VulkanGlobal.h"
 #include <cstdint>
 #include <limits>
 #include <algorithm>
 #include <stdexcept>
 
 
-VulkanSwapChain::VulkanSwapChain(VkSurfaceKHR surface, GLFWwindow *window)
+VulkanSwapChain::VulkanSwapChain(VkSurfaceKHR surface)
 {
 	m_surface = surface;
-	m_window = window;
+	//m_window = window;
 	m_swapChain = VK_NULL_HANDLE;
 }
 
@@ -174,7 +175,7 @@ VkExtent2D VulkanSwapChain::choseSwapExtent(const VkSurfaceCapabilitiesKHR& capa
 	else
 	{
 		int width, height;
-		glfwGetFramebufferSize(m_window, &width, &height);
+		glfwGetFramebufferSize(g_window, &width, &height);
 
 		VkExtent2D actualExtent = {
 			static_cast<uint32_t>(width),

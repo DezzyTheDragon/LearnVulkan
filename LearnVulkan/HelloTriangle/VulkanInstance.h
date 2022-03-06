@@ -1,6 +1,7 @@
 #pragma once
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
+#include "VulkanGlobal.h"
 #include "ValidationLayers.h"
 #include "PhysicalDevice.h"
 #include "VulkanSurface.h"
@@ -26,16 +27,16 @@
 class VulkanInstance
 {
 public:
-	VulkanInstance(GLFWwindow* window);
+	VulkanInstance();
 	~VulkanInstance();
-	VkInstance GetInstance();
+	//VkInstance GetInstance();
 private:
 	void CreateInstance();
 	void CheckExtensions();
 
 	//member variables
-	VkInstance m_instance;						//The vulkan instance
-	GLFWwindow* m_window;
+	//VkInstance m_instance;						//The vulkan instance
+	//GLFWwindow* m_window;
 	//Pointers to other objects
 	ValidationLayers* m_validationLayers;
 	PhysicalDevice* m_physicalDevice;

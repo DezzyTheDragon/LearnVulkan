@@ -1,24 +1,28 @@
 #pragma once
 #include "VulkanInstance.h"
+#include "VulkanGlobal.h"
 #include <stdexcept>
 #include <vector>
 #include <iostream>
 
+VkInstance g_vkInstance;
+
 //Constructor for the class
 //The Constructor will go through and create and set everything up
-VulkanInstance::VulkanInstance(GLFWwindow* window)
+VulkanInstance::VulkanInstance()
 {
 	//var setup
-	m_instance = nullptr;
+	//m_instance = nullptr;
 	m_validationLayers = new ValidationLayers();
-	m_window = window;
+	//m_window = window;
 	//vulkan setup routine
 	CreateInstance();
 	m_validationLayers->SetupDebugMessenger();
 	//surface can influince the device query and must be run first
-	m_surface = new VulkanSurface(m_instance, m_window);
-	m_physicalDevice = new PhysicalDevice(m_instance, m_validationLayers->GetEnableValidation(), 
-				m_validationLayers->GetValidationLayers(), m_surface->GetSurface(), m_window);
+	//m_surface = new VulkanSurface(m_instance, m_window);
+	m_surface = new VulkanSurface();
+	m_physicalDevice = new PhysicalDevice(m_validationLayers->GetEnableValidation(), 
+				m_validationLayers->GetValidationLayers(), m_surface->GetSurface());
 }
 
 //Deconstructor
@@ -30,14 +34,14 @@ VulkanInstance::~VulkanInstance()
 	delete m_validationLayers;
 	delete m_surface;
 	//Vulkan instance should be the last thing that is destroyed
-	vkDestroyInstance(m_instance, nullptr);
+	vkDestroyInstance(g_vkInstance, nullptr);
 }
 
 //Returns the instance variable for outside use
-VkInstance VulkanInstance::GetInstance()
-{
-	return m_instance;
-}
+//VkInstance VulkanInstance::GetInstance()
+//{
+//	return m_instance;
+//}
 
 //Creates the vulkan instance
 void VulkanInstance::CreateInstance()
@@ -97,11 +101,11 @@ void VulkanInstance::CreateInstance()
 
 	//Create the structure
 	//TODO: Fix this warning: Enum type "VkResult" is unscoped. Prefer "enum class" over "enum"
-	if (vkCreateInstance(&createInfo, nullptr, &m_instance) != VK_SUCCESS)
+	if (vkCreateInstance(&createInfo, nullptr, &g_vkInstance) != VK_SUCCESS)
 	{
 		throw std::runtime_error("VulkanInstance: Failed to create vulkan instance");
 	}
-	m_validationLayers->SetVulkanInstance(m_instance);
+	//m_validationLayers->SetVulkanInstance(g_vkInstance);
 }
 
 //Gets a list of the available extensions
