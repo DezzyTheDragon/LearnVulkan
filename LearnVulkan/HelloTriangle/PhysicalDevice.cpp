@@ -1,10 +1,12 @@
 #pragma once
 #include "PhysicalDevice.h"
 #include "VulkanSurface.h"
+#include "VulkanSwapChain.h"
 #include "VulkanGlobal.h"
 #include <stdexcept>
 #include <set>
 
+VulkanSwapChain* g_vkSwapChain;
 
 PhysicalDevice::PhysicalDevice(bool validation, std::vector<const char*> validationLayers)
 {
@@ -12,16 +14,16 @@ PhysicalDevice::PhysicalDevice(bool validation, std::vector<const char*> validat
 	m_validationEnabled = validation;
 	m_validationLayers = validationLayers;
 	//m_surface = surface;
-	m_swapChain = new VulkanSwapChain();
+	g_vkSwapChain = new VulkanSwapChain();
 	PickPhysicalDevice();
 	CreateLogicalDevice();
-	m_swapChain->SetLogicalDevice(m_logicalDevice);
-	m_swapChain->createSwapChain(m_physicalDevice);
+	g_vkSwapChain->SetLogicalDevice(m_logicalDevice);
+	g_vkSwapChain->createSwapChain(m_physicalDevice);
 }
 
 PhysicalDevice::~PhysicalDevice()
 {
-	delete m_swapChain;
+	delete g_vkSwapChain;
 	vkDestroyDevice(m_logicalDevice, nullptr);
 }
 
@@ -141,7 +143,7 @@ bool PhysicalDevice::isDeviceSuitable(VkPhysicalDevice device)
 	bool swapChainAdequate = false;
 	if (extensionsSupported)
 	{
-		SwapChainSupportDetails swapChainSupport = m_swapChain->querySwapChainSupport(device);
+		SwapChainSupportDetails swapChainSupport = g_vkSwapChain->querySwapChainSupport(device);
 		swapChainAdequate = !swapChainSupport.formats.empty() && !swapChainSupport.presentModes.empty();
 	}
 

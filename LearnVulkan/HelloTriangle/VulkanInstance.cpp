@@ -13,18 +13,13 @@ VulkanSurface* g_vkSurface;
 //The Constructor will go through and create and set everything up
 VulkanInstance::VulkanInstance()
 {
-	//var setup
-	//m_instance = nullptr;
 	m_validationLayers = new ValidationLayers();
-	//m_window = window;
 	//vulkan setup routine
 	CreateInstance();
 	m_validationLayers->SetupDebugMessenger();
 	//surface can influince the device query and must be run first
-	//m_surface = new VulkanSurface(m_instance, m_window);
 	g_vkSurface = new VulkanSurface();
-	m_physicalDevice = new PhysicalDevice(m_validationLayers->GetEnableValidation(), 
-				m_validationLayers->GetValidationLayers());
+	m_physicalDevice = new PhysicalDevice(m_validationLayers->GetEnableValidation(), m_validationLayers->GetValidationLayers());
 }
 
 //Deconstructor

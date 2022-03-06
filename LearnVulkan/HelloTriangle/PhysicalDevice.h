@@ -4,7 +4,6 @@
 #include <glfw/glfw3.h>
 #include <vector>
 #include "VulkanStructs.h"
-#include "VulkanSwapChain.h"
 
 /*	This class is responsible for handling searching the physical device
 *	and finding a suitable device to use.
@@ -36,7 +35,7 @@ private:
 	//VkInstance m_instance;
 	//VkSurfaceKHR m_surface;
 	VkPhysicalDevice m_physicalDevice = VK_NULL_HANDLE;
-	VulkanSwapChain* m_swapChain;
+	//VulkanSwapChain* m_swapChain;
 	VkDevice m_logicalDevice;
 	VkQueue m_graphicsQueue;
 	VkQueue m_presentQueue;
