@@ -18,6 +18,8 @@ VkSurfaceKHR VulkanSurface::GetSurface()
 	return m_surface;
 }
 
+
+
 void VulkanSurface::CreateSurface()
 {
 	//TODO: enum class prefered over enum

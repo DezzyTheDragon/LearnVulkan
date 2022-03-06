@@ -4,15 +4,19 @@
 #include <set>
 
 
-PhysicalDevice::PhysicalDevice(VkInstance inst, bool validation, std::vector<const char*> validationLayers, VkSurfaceKHR surface)
+PhysicalDevice::PhysicalDevice(VkInstance inst, bool validation, 
+								std::vector<const char*> validationLayers, VkSurfaceKHR surface,
+								GLFWwindow *window)
 {
 	m_instance = inst;
 	m_validationEnabled = validation;
 	m_validationLayers = validationLayers;
 	m_surface = surface;
-	m_swapChain = new VulkanSwapChain(surface);
+	m_swapChain = new VulkanSwapChain(surface, window);
 	PickPhysicalDevice();
 	CreateLogicalDevice();
+	m_swapChain->SetLogicalDevice(m_logicalDevice);
+	m_swapChain->createSwapChain(m_physicalDevice);
 }
 
 PhysicalDevice::~PhysicalDevice()

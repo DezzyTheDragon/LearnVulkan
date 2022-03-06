@@ -20,7 +20,9 @@ class PhysicalDevice
 {
 public:
 	//Class c'tor, d'tor, etc
-	PhysicalDevice(VkInstance inst, bool validation, std::vector<const char*> validationLayers, VkSurfaceKHR surface);
+	PhysicalDevice(VkInstance inst, bool validation, 
+					std::vector<const char*> validationLayers, VkSurfaceKHR surface, 
+					GLFWwindow *window);
 	~PhysicalDevice();
 	//Class Getters
 	VkPhysicalDevice GetPhysicalDevice();

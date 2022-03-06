@@ -18,7 +18,7 @@ VulkanInstance::VulkanInstance(GLFWwindow* window)
 	//surface can influince the device query and must be run first
 	m_surface = new VulkanSurface(m_instance, m_window);
 	m_physicalDevice = new PhysicalDevice(m_instance, m_validationLayers->GetEnableValidation(), 
-				m_validationLayers->GetValidationLayers(), m_surface->GetSurface());
+				m_validationLayers->GetValidationLayers(), m_surface->GetSurface(), m_window);
 }
 
 //Deconstructor
