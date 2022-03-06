@@ -4,7 +4,7 @@
 #include "VulkanGlobal.h"
 #include "ValidationLayers.h"
 #include "PhysicalDevice.h"
-#include "VulkanSurface.h"
+
 
 /*	The purpose of this class is to create the vulkan instance
 *	It will be responsible for creating the instance itself and
@@ -40,5 +40,5 @@ private:
 	//Pointers to other objects
 	ValidationLayers* m_validationLayers;
 	PhysicalDevice* m_physicalDevice;
-	VulkanSurface* m_surface;
+	//VulkanSurface* m_surface;
 };

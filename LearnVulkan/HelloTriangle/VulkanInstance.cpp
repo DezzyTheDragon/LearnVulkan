@@ -1,11 +1,13 @@
 #pragma once
 #include "VulkanInstance.h"
+#include "VulkanSurface.h"
 #include "VulkanGlobal.h"
 #include <stdexcept>
 #include <vector>
 #include <iostream>
 
 VkInstance g_vkInstance;
+VulkanSurface* g_vkSurface;
 
 //Constructor for the class
 //The Constructor will go through and create and set everything up
@@ -20,9 +22,9 @@ VulkanInstance::VulkanInstance()
 	m_validationLayers->SetupDebugMessenger();
 	//surface can influince the device query and must be run first
 	//m_surface = new VulkanSurface(m_instance, m_window);
-	m_surface = new VulkanSurface();
+	g_vkSurface = new VulkanSurface();
 	m_physicalDevice = new PhysicalDevice(m_validationLayers->GetEnableValidation(), 
-				m_validationLayers->GetValidationLayers(), m_surface->GetSurface());
+				m_validationLayers->GetValidationLayers());
 }
 
 //Deconstructor
@@ -32,7 +34,7 @@ VulkanInstance::~VulkanInstance()
 {
 	delete m_physicalDevice;
 	delete m_validationLayers;
-	delete m_surface;
+	delete g_vkSurface;
 	//Vulkan instance should be the last thing that is destroyed
 	vkDestroyInstance(g_vkInstance, nullptr);
 }

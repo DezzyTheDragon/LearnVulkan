@@ -1,4 +1,5 @@
 #include "VulkanSwapChain.h"
+#include "VulkanSurface.h"
 #include "VulkanGlobal.h"
 #include <cstdint>
 #include <limits>
@@ -6,9 +7,9 @@
 #include <stdexcept>
 
 
-VulkanSwapChain::VulkanSwapChain(VkSurfaceKHR surface)
+VulkanSwapChain::VulkanSwapChain()
 {
-	m_surface = surface;
+	//m_surface = surface;
 	//m_window = window;
 	m_swapChain = VK_NULL_HANDLE;
 }
@@ -40,7 +41,7 @@ void VulkanSwapChain::createSwapChain(VkPhysicalDevice physicalDevice)
 
 	VkSwapchainCreateInfoKHR createInfo{};
 	createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
-	createInfo.surface = m_surface;
+	createInfo.surface = g_vkSurface->GetSurface();
 	createInfo.minImageCount = imageCount;
 	createInfo.imageFormat = surfaceFormat.format;
 	createInfo.imageColorSpace = surfaceFormat.colorSpace;
@@ -103,20 +104,20 @@ void VulkanSwapChain::SetLogicalDevice(VkDevice device)
 SwapChainSupportDetails VulkanSwapChain::querySwapChainSupport(VkPhysicalDevice device)
 {
 	SwapChainSupportDetails details;
-	vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, m_surface, &details.capabilities);
+	vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, g_vkSurface->GetSurface(), &details.capabilities);
 	uint32_t formatCount;
 	uint32_t presentModeCount;
-	vkGetPhysicalDeviceSurfaceFormatsKHR(device, m_surface, &formatCount, nullptr);
-	vkGetPhysicalDeviceSurfacePresentModesKHR(device, m_surface, &presentModeCount, nullptr);
+	vkGetPhysicalDeviceSurfaceFormatsKHR(device, g_vkSurface->GetSurface(), &formatCount, nullptr);
+	vkGetPhysicalDeviceSurfacePresentModesKHR(device, g_vkSurface->GetSurface(), &presentModeCount, nullptr);
 	if (formatCount != 0)
 	{
 		details.formats.resize(formatCount);
-		vkGetPhysicalDeviceSurfaceFormatsKHR(device, m_surface, &formatCount, details.formats.data());
+		vkGetPhysicalDeviceSurfaceFormatsKHR(device, g_vkSurface->GetSurface(), &formatCount, details.formats.data());
 	}
 	if (presentModeCount != 0)
 	{
 		details.presentModes.resize(presentModeCount);
-		vkGetPhysicalDeviceSurfacePresentModesKHR(device, m_surface, &presentModeCount, details.presentModes.data());
+		vkGetPhysicalDeviceSurfacePresentModesKHR(device, g_vkSurface->GetSurface(), &presentModeCount, details.presentModes.data());
 	}
 	return details;
 }
@@ -209,7 +210,7 @@ QueueFamilyIndices VulkanSwapChain::FindQueueFamilies(VkPhysicalDevice device)
 			indices.graphicsFamily = 1;
 		}
 		VkBool32 presentSupport = false;
-		vkGetPhysicalDeviceSurfaceSupportKHR(device, i, m_surface, &presentSupport);
+		vkGetPhysicalDeviceSurfaceSupportKHR(device, i, g_vkSurface->GetSurface(), &presentSupport);
 		if (presentSupport)
 		{
 			indices.presentFamily = i;

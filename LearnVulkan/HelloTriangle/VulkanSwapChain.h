@@ -12,7 +12,7 @@
 class VulkanSwapChain
 {
 public:
-	VulkanSwapChain(VkSurfaceKHR surface);
+	VulkanSwapChain();
 	~VulkanSwapChain();
 	void createSwapChain(VkPhysicalDevice physicalDevice);
 	VkSwapchainKHR GetSwapChain();
@@ -25,7 +25,7 @@ public:
 	VkExtent2D choseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities);
 private:
 	QueueFamilyIndices FindQueueFamilies(VkPhysicalDevice device);
-	VkSurfaceKHR m_surface;
+	//VkSurfaceKHR m_surface;
 	//GLFWwindow* m_window;
 	VkSwapchainKHR m_swapChain;
 	std::vector<VkImage> m_swapChainImages;

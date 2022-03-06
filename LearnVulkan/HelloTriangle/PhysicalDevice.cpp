@@ -1,18 +1,18 @@
 #pragma once
 #include "PhysicalDevice.h"
+#include "VulkanSurface.h"
 #include "VulkanGlobal.h"
 #include <stdexcept>
 #include <set>
 
 
-PhysicalDevice::PhysicalDevice(bool validation, 
-								std::vector<const char*> validationLayers, VkSurfaceKHR surface)
+PhysicalDevice::PhysicalDevice(bool validation, std::vector<const char*> validationLayers)
 {
 	//m_instance = inst;
 	m_validationEnabled = validation;
 	m_validationLayers = validationLayers;
-	m_surface = surface;
-	m_swapChain = new VulkanSwapChain(surface);
+	//m_surface = surface;
+	m_swapChain = new VulkanSwapChain();
 	PickPhysicalDevice();
 	CreateLogicalDevice();
 	m_swapChain->SetLogicalDevice(m_logicalDevice);
@@ -186,7 +186,7 @@ QueueFamilyIndices PhysicalDevice::FindQueueFamilies(VkPhysicalDevice device)
 			indices.graphicsFamily = 1;
 		}
 		VkBool32 presentSupport = false;
-		vkGetPhysicalDeviceSurfaceSupportKHR(device, i, m_surface, &presentSupport);
+		vkGetPhysicalDeviceSurfaceSupportKHR(device, i, g_vkSurface->GetSurface(), &presentSupport);
 		if (presentSupport)
 		{
 			indices.presentFamily = i;
