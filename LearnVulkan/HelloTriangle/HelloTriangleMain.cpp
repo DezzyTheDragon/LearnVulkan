@@ -1,15 +1,12 @@
 #include "HelloTriangleMain.h"
 #include "VulkanGlobal.h"
 
-//#include "InitVulkan.h"
-
 GLFWwindow* g_window;
 
 //Default constructor
 HelloTriangleMain::HelloTriangleMain()
 {
 	ht_vkInstance = nullptr;
-	m_window = nullptr;
 }
 
 //The real start of the render application
@@ -32,7 +29,6 @@ void HelloTriangleMain::initWindow()
 	//Vulkan is picky with resizing needing swapchains and presentations to be remade, so it will be disabled for now
 	glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 	//glfwCreateWindow | width, height, title, window monitor, Ignore because its openGL specific
-	//m_window = glfwCreateWindow(WIDTH, HEIGHT, "Vulkan", nullptr, nullptr);
 	g_window = glfwCreateWindow(WIDTH, HEIGHT, "Vulkan", nullptr, nullptr);
 }
 
@@ -62,7 +58,7 @@ void HelloTriangleMain::cleanup()
 	delete ht_vkInstance;
 
 	//Destroy the glfw window
-	glfwDestroyWindow(m_window);
+	glfwDestroyWindow(g_window);
 	
 	//Terminate glfw, must happen after all the other glfw objects have been cleaned
 	glfwTerminate();

@@ -9,7 +9,6 @@
 ValidationLayers::ValidationLayers()
 {
 	m_debugMessenger = nullptr;
-	//m_instance = nullptr;
 	if (enableValidationLayers && !CheckValidationLayerSupport())
 	{
 		throw std::runtime_error("ValidationLayers: Validation layers requested were not available");
@@ -30,18 +29,6 @@ bool ValidationLayers::GetEnableValidation()
 {
 	return enableValidationLayers;
 }
-
-/*	The vulkan instance is needed for construction and
-*	destruction, but at the time of object creation the
-*	instance is not ready so it needs to be set at a
-*	later time
-*/
-
-//Setter for the vulkan instance
-//void ValidationLayers::SetVulkanInstance(VkInstance inst)
-//{
-//	m_instance = inst;
-//}
 
 VkDebugUtilsMessengerEXT ValidationLayers::GetDebugInstance()
 {
@@ -84,15 +71,6 @@ void ValidationLayers::SetupDebugMessenger()
 	
 	VkDebugUtilsMessengerCreateInfoEXT createInfo;
 	populateDebugMessengerCreateInfo(createInfo);
-	/*createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
-	createInfo.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT |
-		VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
-		VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
-	createInfo.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT |
-		VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT |
-		VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
-	createInfo.pfnUserCallback = debugCallback;*/
-	
 
 	//TODO: prefer enum class over enum
 	if (CreateDebugUtilsMessengerEXT(g_vkInstance, &createInfo, nullptr, &m_debugMessenger) != VK_SUCCESS)

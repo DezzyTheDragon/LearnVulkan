@@ -29,16 +29,13 @@ class VulkanInstance
 public:
 	VulkanInstance();
 	~VulkanInstance();
-	//VkInstance GetInstance();
 private:
 	void CreateInstance();
 	void CheckExtensions();
 
 	//member variables
-	//VkInstance m_instance;						//The vulkan instance
-	//GLFWwindow* m_window;
+	
 	//Pointers to other objects
 	ValidationLayers* m_validationLayers;
 	PhysicalDevice* m_physicalDevice;
-	//VulkanSurface* m_surface;
 };

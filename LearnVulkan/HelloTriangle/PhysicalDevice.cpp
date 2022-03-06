@@ -10,10 +10,8 @@ VulkanSwapChain* g_vkSwapChain;
 
 PhysicalDevice::PhysicalDevice(bool validation, std::vector<const char*> validationLayers)
 {
-	//m_instance = inst;
 	m_validationEnabled = validation;
 	m_validationLayers = validationLayers;
-	//m_surface = surface;
 	g_vkSwapChain = new VulkanSwapChain();
 	PickPhysicalDevice();
 	CreateLogicalDevice();

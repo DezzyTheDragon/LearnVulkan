@@ -9,8 +9,6 @@
 
 VulkanSwapChain::VulkanSwapChain()
 {
-	//m_surface = surface;
-	//m_window = window;
 	m_swapChain = VK_NULL_HANDLE;
 }
 

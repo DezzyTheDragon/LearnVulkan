@@ -15,7 +15,7 @@ private:
 	void cleanup();
 
 	//Class members
-	GLFWwindow* m_window;	//Holds the reference to the glfw window
+	//GLFWwindow* m_window;	//Holds the reference to the glfw window
 	VulkanInstance* ht_vkInstance;
 
 

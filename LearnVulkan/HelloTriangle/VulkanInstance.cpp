@@ -34,12 +34,6 @@ VulkanInstance::~VulkanInstance()
 	vkDestroyInstance(g_vkInstance, nullptr);
 }
 
-//Returns the instance variable for outside use
-//VkInstance VulkanInstance::GetInstance()
-//{
-//	return m_instance;
-//}
-
 //Creates the vulkan instance
 void VulkanInstance::CreateInstance()
 {

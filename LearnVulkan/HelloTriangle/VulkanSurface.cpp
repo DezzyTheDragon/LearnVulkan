@@ -4,8 +4,6 @@
 
 VulkanSurface::VulkanSurface()
 {
-	//m_window = window;
-	//m_instance = inst;
 	CreateSurface();
 }
 
@@ -18,8 +16,6 @@ VkSurfaceKHR VulkanSurface::GetSurface()
 {
 	return m_surface;
 }
-
-
 
 void VulkanSurface::CreateSurface()
 {

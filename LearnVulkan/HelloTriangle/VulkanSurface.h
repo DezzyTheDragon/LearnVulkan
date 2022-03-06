@@ -22,7 +22,5 @@ private:
 	void CreateSurface();
 	//member variables
 	VkSurfaceKHR m_surface;
-	//GLFWwindow* m_window;
-	//VkInstance m_instance;
 
 };

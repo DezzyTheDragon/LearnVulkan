@@ -11,7 +11,6 @@ public:
 	ValidationLayers();
 	~ValidationLayers();
 	bool GetEnableValidation();
-	//void SetVulkanInstance(VkInstance inst);
 	VkDebugUtilsMessengerEXT GetDebugInstance();
 	std::vector<const char*> GetValidationLayers();
 	std::vector<const char*> GetRequiredExtensions();
@@ -34,7 +33,6 @@ private:
 	};
 
 	VkDebugUtilsMessengerEXT m_debugMessenger;
-	//VkInstance m_instance;
 
 	//If we are debuging enable the validation layers
 #ifdef DEBUG

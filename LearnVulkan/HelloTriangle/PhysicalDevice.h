@@ -32,10 +32,7 @@ private:
 	bool CheckDeviceExtensions(VkPhysicalDevice device);
 	QueueFamilyIndices FindQueueFamilies(VkPhysicalDevice device);
 	//member variables
-	//VkInstance m_instance;
-	//VkSurfaceKHR m_surface;
 	VkPhysicalDevice m_physicalDevice = VK_NULL_HANDLE;
-	//VulkanSwapChain* m_swapChain;
 	VkDevice m_logicalDevice;
 	VkQueue m_graphicsQueue;
 	VkQueue m_presentQueue;
