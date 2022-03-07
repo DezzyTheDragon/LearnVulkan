@@ -22,6 +22,7 @@ VulkanInstance::VulkanInstance()
 	g_vkSurface = new VulkanSurface();
 	m_physicalDevice = new PhysicalDevice(m_validationLayers->GetEnableValidation(), m_validationLayers->GetValidationLayers());
 	CreateImageViews();
+	m_graphicsPipeline = new VulkanGraphicsPipeline();
 }
 
 //Deconstructor

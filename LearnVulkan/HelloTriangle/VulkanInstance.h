@@ -4,6 +4,7 @@
 #include "VulkanGlobal.h"
 #include "ValidationLayers.h"
 #include "PhysicalDevice.h"
+#include "VulkanGraphicsPipeline.h"
 
 
 /*	The purpose of this class is to create the vulkan instance
@@ -39,5 +40,6 @@ private:
 	//Pointers to other objects
 	ValidationLayers* m_validationLayers;
 	PhysicalDevice* m_physicalDevice;
+	VulkanGraphicsPipeline* m_graphicsPipeline;
 	std::vector<VkImageView> m_swapChainImageViews;
 };
