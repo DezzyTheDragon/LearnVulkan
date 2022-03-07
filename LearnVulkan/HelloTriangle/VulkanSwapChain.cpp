@@ -93,6 +93,11 @@ VkExtent2D VulkanSwapChain::GetExtent()
 	return m_swapChainExtent;
 }
 
+std::vector<VkImage> VulkanSwapChain::GetSwapChainImages()
+{
+	return m_swapChainImages;
+}
+
 void VulkanSwapChain::SetLogicalDevice(VkDevice device)
 {
 	m_device = device;

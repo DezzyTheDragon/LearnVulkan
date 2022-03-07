@@ -1,6 +1,7 @@
 #pragma once
 #include "VulkanInstance.h"
 #include "VulkanSurface.h"
+#include "VulkanSwapChain.h"
 #include "VulkanGlobal.h"
 #include <stdexcept>
 #include <vector>
@@ -20,6 +21,7 @@ VulkanInstance::VulkanInstance()
 	//surface can influince the device query and must be run first
 	g_vkSurface = new VulkanSurface();
 	m_physicalDevice = new PhysicalDevice(m_validationLayers->GetEnableValidation(), m_validationLayers->GetValidationLayers());
+	CreateImageViews();
 }
 
 //Deconstructor
@@ -27,6 +29,10 @@ VulkanInstance::VulkanInstance()
 //before this object gets deleted
 VulkanInstance::~VulkanInstance()
 {
+	for (auto imageView : m_swapChainImageViews)
+	{
+		vkDestroyImageView(m_physicalDevice->GetLogicalDevice(), imageView, nullptr);
+	}
 	delete m_physicalDevice;
 	delete m_validationLayers;
 	delete g_vkSurface;
@@ -97,6 +103,36 @@ void VulkanInstance::CreateInstance()
 		throw std::runtime_error("VulkanInstance: Failed to create vulkan instance");
 	}
 	//m_validationLayers->SetVulkanInstance(g_vkInstance);
+}
+
+void VulkanInstance::CreateImageViews()
+{
+	m_swapChainImageViews.resize(g_vkSwapChain->GetSwapChainImages().size());
+
+	for (size_t i = 0; i < g_vkSwapChain->GetSwapChainImages().size(); i++)
+	{
+		VkImageViewCreateInfo createInfo{};
+		createInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+		createInfo.image = g_vkSwapChain->GetSwapChainImages()[i];
+		createInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+		createInfo.format = g_vkSwapChain->GetImageFormat();
+		//adjust color chanels
+		createInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
+		createInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
+		createInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
+		createInfo.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
+		//define image purpose
+		createInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		createInfo.subresourceRange.baseMipLevel = 0;
+		createInfo.subresourceRange.layerCount = 1;
+		createInfo.subresourceRange.baseArrayLayer = 0;
+		createInfo.subresourceRange.layerCount = 1;
+
+		if (vkCreateImageView(m_physicalDevice->GetLogicalDevice(), &createInfo, nullptr, &m_swapChainImageViews[i]) != VK_SUCCESS)
+		{
+			throw std::runtime_error("VulkanInstance: Failed to create image views");
+		}
+	}
 }
 
 //Gets a list of the available extensions

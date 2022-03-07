@@ -18,6 +18,7 @@ public:
 	VkSwapchainKHR GetSwapChain();
 	VkFormat GetImageFormat();
 	VkExtent2D GetExtent();
+	std::vector<VkImage> GetSwapChainImages();
 	void SetLogicalDevice(VkDevice device);
 	SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device);
 	VkSurfaceFormatKHR choseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats);

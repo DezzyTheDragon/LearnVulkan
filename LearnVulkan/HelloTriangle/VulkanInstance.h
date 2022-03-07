@@ -31,6 +31,7 @@ public:
 	~VulkanInstance();
 private:
 	void CreateInstance();
+	void CreateImageViews();
 	void CheckExtensions();
 
 	//member variables
@@ -38,4 +39,5 @@ private:
 	//Pointers to other objects
 	ValidationLayers* m_validationLayers;
 	PhysicalDevice* m_physicalDevice;
+	std::vector<VkImageView> m_swapChainImageViews;
 };
