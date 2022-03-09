@@ -17,6 +17,11 @@ VulkanGraphicsPipeline::~VulkanGraphicsPipeline()
 	vkDestroyRenderPass(m_device, m_renderPass, nullptr);
 }
 
+VkRenderPass VulkanGraphicsPipeline::GetRenderPass()
+{
+	return m_renderPass;
+}
+
 void VulkanGraphicsPipeline::CreateRenderPass()
 {
 	VkAttachmentDescription colorAttachment{};

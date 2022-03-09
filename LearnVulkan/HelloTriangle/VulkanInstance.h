@@ -4,6 +4,7 @@
 #include "VulkanGlobal.h"
 #include "ValidationLayers.h"
 #include "PhysicalDevice.h"
+#include "VulkanFrameBuffer.h"
 #include "VulkanGraphicsPipeline.h"
 
 
@@ -40,6 +41,7 @@ private:
 	//Pointers to other objects
 	ValidationLayers* m_validationLayers;
 	PhysicalDevice* m_physicalDevice;
-	VulkanGraphicsPipeline* m_graphicsPipeline;
+	//VulkanGraphicsPipeline* m_graphicsPipeline;
+	VulkanFrameBuffer* m_frameBuffer;
 	std::vector<VkImageView> m_swapChainImageViews;
 };

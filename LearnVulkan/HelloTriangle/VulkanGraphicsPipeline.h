@@ -17,6 +17,7 @@ class VulkanGraphicsPipeline
 public:
 	VulkanGraphicsPipeline(VkDevice device);
 	~VulkanGraphicsPipeline();
+	VkRenderPass GetRenderPass();
 private:
 	void CreateRenderPass();
 	void CreateGraphicsPipeline();
