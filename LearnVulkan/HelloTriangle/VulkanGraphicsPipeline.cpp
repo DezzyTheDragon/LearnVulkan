@@ -12,6 +12,7 @@ VulkanGraphicsPipeline::VulkanGraphicsPipeline(VkDevice device)
 
 VulkanGraphicsPipeline::~VulkanGraphicsPipeline()
 {
+	vkDestroyPipeline(m_device, m_graphicsPipeline, nullptr);
 	vkDestroyPipelineLayout(m_device, m_pipelineLayout, nullptr);
 	vkDestroyRenderPass(m_device, m_renderPass, nullptr);
 }
@@ -64,7 +65,7 @@ void VulkanGraphicsPipeline::CreateGraphicsPipeline()
 
 	VkPipelineShaderStageCreateInfo fragCreateInfo{};
 	fragCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-	fragCreateInfo.stage = VK_SHADER_STAGE_VERTEX_BIT;
+	fragCreateInfo.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
 	fragCreateInfo.module = fragShaderModule;
 	fragCreateInfo.pName = "main";
 
@@ -107,7 +108,7 @@ void VulkanGraphicsPipeline::CreateGraphicsPipeline()
 	//Rasterizer
 	VkPipelineRasterizationStateCreateInfo rasterizer{};
 	rasterizer.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
-	rasterizer.depthClampEnable = VK_TRUE;
+	rasterizer.depthClampEnable = VK_FALSE;
 	rasterizer.rasterizerDiscardEnable = VK_FALSE;
 	rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
 	rasterizer.lineWidth = 1.0f;
@@ -174,6 +175,30 @@ void VulkanGraphicsPipeline::CreateGraphicsPipeline()
 		throw std::runtime_error("VulkanGraphicsPipeline: Failed to create pipeline layout");
 	}
 
+	VkGraphicsPipelineCreateInfo pipelineInfo{};
+	pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
+	pipelineInfo.stageCount = 2;
+	pipelineInfo.pStages = shaderStages;
+	pipelineInfo.pVertexInputState = &vertexInputInfo;
+	pipelineInfo.pInputAssemblyState = &inputAssembly;
+	pipelineInfo.pViewportState = &viewportState;
+	pipelineInfo.pRasterizationState = &rasterizer;
+	pipelineInfo.pMultisampleState = &multisampling;
+	pipelineInfo.pDepthStencilState = nullptr;
+	pipelineInfo.pColorBlendState = &colorBlending;
+	pipelineInfo.pDynamicState = nullptr;
+	pipelineInfo.layout = m_pipelineLayout;
+	pipelineInfo.renderPass = m_renderPass;
+	pipelineInfo.subpass = 0;
+	pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
+	pipelineInfo.basePipelineIndex = 0;
+
+	if (vkCreateGraphicsPipelines(m_device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &m_graphicsPipeline) != VK_SUCCESS)
+	{
+		throw std::runtime_error("VulkanGraphicsPipeline: failed to create graphics pipeline");
+	}
+	
+
 	//Shaders have served their purpose and are no longer needed
 	vkDestroyShaderModule(m_device, fragShaderModule, nullptr);
 	vkDestroyShaderModule(m_device, vertShaderModule, nullptr);
@@ -202,7 +227,7 @@ std::vector<char> VulkanGraphicsPipeline::ReadFile(const std::string& fileName)
 	//start at end of file so we can easily allocate the required amount of space
 	std::ifstream file(fileName, std::ios::ate | std::ios::binary);
 
-	if (file.is_open() == false)
+	if (!file.is_open())
 	{
 		throw std::runtime_error("VulkanGraphicsPipeline: Failed to open " + fileName);
 	}

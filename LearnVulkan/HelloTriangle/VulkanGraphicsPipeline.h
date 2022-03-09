@@ -26,4 +26,5 @@ private:
 	VkDevice m_device;
 	VkRenderPass m_renderPass;
 	VkPipelineLayout m_pipelineLayout;
+	VkPipeline m_graphicsPipeline;
 };
