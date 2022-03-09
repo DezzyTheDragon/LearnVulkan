@@ -18,10 +18,12 @@ public:
 	VulkanGraphicsPipeline(VkDevice device);
 	~VulkanGraphicsPipeline();
 private:
+	void CreateRenderPass();
 	void CreateGraphicsPipeline();
 	VkShaderModule createShaderModule(const std::vector<char>& code);
 
 	static std::vector<char> ReadFile(const std::string& fileName);
 	VkDevice m_device;
+	VkRenderPass m_renderPass;
 	VkPipelineLayout m_pipelineLayout;
 };

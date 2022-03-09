@@ -22,7 +22,7 @@ VulkanInstance::VulkanInstance()
 	g_vkSurface = new VulkanSurface();
 	m_physicalDevice = new PhysicalDevice(m_validationLayers->GetEnableValidation(), m_validationLayers->GetValidationLayers());
 	CreateImageViews();
-	m_graphicsPipeline = new VulkanGraphicsPipeline();
+	m_graphicsPipeline = new VulkanGraphicsPipeline(m_physicalDevice->GetLogicalDevice());
 }
 
 //Deconstructor
@@ -30,6 +30,7 @@ VulkanInstance::VulkanInstance()
 //before this object gets deleted
 VulkanInstance::~VulkanInstance()
 {
+	delete m_graphicsPipeline;
 	for (auto imageView : m_swapChainImageViews)
 	{
 		vkDestroyImageView(m_physicalDevice->GetLogicalDevice(), imageView, nullptr);
