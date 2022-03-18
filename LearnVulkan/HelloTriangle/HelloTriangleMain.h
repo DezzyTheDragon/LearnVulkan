@@ -13,9 +13,11 @@ private:
 	void initVulkan();
 	void mainLoop();
 	void cleanup();
+	void drawFrame();
 
 	//Class members
 	//GLFWwindow* m_window;	//Holds the reference to the glfw window
+
 	VulkanInstance* ht_vkInstance;
 
 

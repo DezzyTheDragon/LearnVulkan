@@ -21,8 +21,9 @@ public:
 	~PhysicalDevice();
 	//Class Getters
 	VkPhysicalDevice GetPhysicalDevice();
-	VkDevice GetLogicalDevice();
+	//VkDevice GetLogicalDevice();
 	VkQueue GetGraphicsQueue();
+	QueueFamilyIndices FindQueueFamilies(VkPhysicalDevice device);
 
 private:
 	//Class functions
@@ -30,10 +31,9 @@ private:
 	void CreateLogicalDevice();
 	bool isDeviceSuitable(VkPhysicalDevice device);
 	bool CheckDeviceExtensions(VkPhysicalDevice device);
-	QueueFamilyIndices FindQueueFamilies(VkPhysicalDevice device);
 	//member variables
 	VkPhysicalDevice m_physicalDevice = VK_NULL_HANDLE;
-	VkDevice m_logicalDevice;
+	//VkDevice m_logicalDevice;
 	VkQueue m_graphicsQueue;
 	VkQueue m_presentQueue;
 	const std::vector<const char*> m_deviceExtensions = {

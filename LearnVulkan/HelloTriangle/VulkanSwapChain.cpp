@@ -14,7 +14,7 @@ VulkanSwapChain::VulkanSwapChain()
 
 VulkanSwapChain::~VulkanSwapChain()
 {
-	vkDestroySwapchainKHR(m_device, m_swapChain, nullptr);
+	vkDestroySwapchainKHR(g_device, m_swapChain, nullptr);
 }
 
 void VulkanSwapChain::createSwapChain(VkPhysicalDevice physicalDevice)
@@ -67,15 +67,15 @@ void VulkanSwapChain::createSwapChain(VkPhysicalDevice physicalDevice)
 	createInfo.clipped = VK_TRUE;
 	createInfo.oldSwapchain = VK_NULL_HANDLE;
 
-	if (vkCreateSwapchainKHR(m_device, &createInfo, nullptr, &m_swapChain) != VK_SUCCESS)
+	if (vkCreateSwapchainKHR(g_device, &createInfo, nullptr, &m_swapChain) != VK_SUCCESS)
 	{
 		throw std::runtime_error("VulkanSwapChain: Failed to create swap chain");
 	}
 
 	//Get the hadles for the VkImages
-	vkGetSwapchainImagesKHR(m_device, m_swapChain, &imageCount, nullptr);
+	vkGetSwapchainImagesKHR(g_device, m_swapChain, &imageCount, nullptr);
 	m_swapChainImages.resize(imageCount);
-	vkGetSwapchainImagesKHR(m_device, m_swapChain, &imageCount, m_swapChainImages.data());
+	vkGetSwapchainImagesKHR(g_device, m_swapChain, &imageCount, m_swapChainImages.data());
 }
 
 VkSwapchainKHR VulkanSwapChain::GetSwapChain()
@@ -98,10 +98,10 @@ std::vector<VkImage> VulkanSwapChain::GetSwapChainImages()
 	return m_swapChainImages;
 }
 
-void VulkanSwapChain::SetLogicalDevice(VkDevice device)
-{
-	m_device = device;
-}
+//void VulkanSwapChain::SetLogicalDevice(VkDevice device)
+//{
+//	m_device = device;
+//}
 
 //search for swapchain support
 SwapChainSupportDetails VulkanSwapChain::querySwapChainSupport(VkPhysicalDevice device)

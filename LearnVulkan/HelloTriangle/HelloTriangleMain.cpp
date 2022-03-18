@@ -1,5 +1,8 @@
+#pragma once
 #include "HelloTriangleMain.h"
 #include "VulkanGlobal.h"
+#include "VulkanSwapChain.h"
+#include "VulkanCommands.h"
 
 GLFWwindow* g_window;
 
@@ -46,6 +49,7 @@ void HelloTriangleMain::mainLoop()
 	while (!glfwWindowShouldClose(g_window))
 	{
 		glfwPollEvents();
+		drawFrame();
 	}
 }
 
@@ -62,4 +66,35 @@ void HelloTriangleMain::cleanup()
 	
 	//Terminate glfw, must happen after all the other glfw objects have been cleaned
 	glfwTerminate();
+}
+
+void HelloTriangleMain::drawFrame()
+{
+	vkWaitForFences(g_device, 1, ht_vkInstance->GetInFlightFenceRef(), VK_TRUE, UINT64_MAX);
+	vkResetFences(g_device, 1, ht_vkInstance->GetInFlightFenceRef());
+
+	uint32_t imageIndex;
+	vkAcquireNextImageKHR(g_device, g_vkSwapChain->GetSwapChain(), UINT32_MAX, ht_vkInstance->GetImageAvailableSemaphore(), VK_NULL_HANDLE, &imageIndex);
+
+	vkResetCommandBuffer(g_vkCommands->GetCommandBuffer(), 0);
+	g_vkCommands->RecordCommandBuffer(g_vkCommands->GetCommandBuffer(), imageIndex);
+
+	VkSubmitInfo submitInfo{};
+	submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+
+	VkSemaphore waitSemaphores[] = { ht_vkInstance->GetImageAvailableSemaphore() };
+	VkPipelineStageFlags waitStages[] = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
+	submitInfo.waitSemaphoreCount = 1;
+	submitInfo.pWaitSemaphores = waitSemaphores;
+	submitInfo.pWaitDstStageMask = waitStages;
+	submitInfo.commandBufferCount = 1;
+	submitInfo.pCommandBuffers = g_vkCommands->GetCommandBuffer();
+
+	VkSemaphore signalSemaphores[] = { ht_vkInstance->GetRenderFinishedSemaphore() };
+	submitInfo.signalSemaphoreCount = 1;
+	submitInfo.pSignalSemaphores = signalSemaphores;
+
+	if (vkQueueSubmit())
+	{
+	}
 }

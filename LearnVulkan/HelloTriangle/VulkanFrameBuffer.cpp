@@ -4,10 +4,10 @@
 #include "VulkanGlobal.h"
 #include <stdexcept>
 
-VulkanFrameBuffer::VulkanFrameBuffer(std::vector<VkImageView> imageViews, VkDevice device)
+VulkanFrameBuffer::VulkanFrameBuffer(std::vector<VkImageView> imageViews)
 {
 	m_imageViews = imageViews;
-	m_device = device;
+	//m_device = device;
 	CreateFrameBuffer();
 }
 
@@ -15,8 +15,18 @@ VulkanFrameBuffer::~VulkanFrameBuffer()
 {
 	for (auto framebuffer : m_swapChainFrameBuffers)
 	{
-		vkDestroyFramebuffer(m_device, framebuffer, nullptr);
+		vkDestroyFramebuffer(g_device, framebuffer, nullptr);
 	}
+}
+
+std::vector<VkFramebuffer> VulkanFrameBuffer::GetSwapChainFrameBuffers()
+{
+	return m_swapChainFrameBuffers;
+}
+
+std::vector<VkImageView> VulkanFrameBuffer::GetImageViews()
+{
+	return m_imageViews;
 }
 
 void VulkanFrameBuffer::CreateFrameBuffer()
@@ -38,7 +48,7 @@ void VulkanFrameBuffer::CreateFrameBuffer()
 		frameBufferInfo.height = g_vkSwapChain->GetExtent().height;
 		frameBufferInfo.layers = 1;
 
-		if (vkCreateFramebuffer(m_device, &frameBufferInfo, nullptr, &m_swapChainFrameBuffers[i]) != VK_SUCCESS)
+		if (vkCreateFramebuffer(g_device, &frameBufferInfo, nullptr, &m_swapChainFrameBuffers[i]) != VK_SUCCESS)
 		{
 			throw std::runtime_error("VulkanFrameBuffer: failed to create frame buffer");
 		}

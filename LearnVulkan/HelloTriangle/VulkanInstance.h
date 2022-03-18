@@ -6,6 +6,7 @@
 #include "PhysicalDevice.h"
 #include "VulkanFrameBuffer.h"
 #include "VulkanGraphicsPipeline.h"
+#include "VulkanCommands.h"
 
 
 /*	The purpose of this class is to create the vulkan instance
@@ -31,10 +32,14 @@ class VulkanInstance
 public:
 	VulkanInstance();
 	~VulkanInstance();
+	VkSemaphore GetImageAvailableSemaphore();
+	VkSemaphore GetRenderFinishedSemaphore();
+	VkFence* GetInFlightFenceRef();
 private:
 	void CreateInstance();
 	void CreateImageViews();
 	void CheckExtensions();
+	void CreateSyncObjects();
 
 	//member variables
 	
@@ -44,4 +49,8 @@ private:
 	//VulkanGraphicsPipeline* m_graphicsPipeline;
 	VulkanFrameBuffer* m_frameBuffer;
 	std::vector<VkImageView> m_swapChainImageViews;
+	//VulkanCommands* m_commands;
+	VkSemaphore m_imageAvailableSemaphore;
+	VkSemaphore m_renderFinishedSemaphore;
+	VkFence m_inFlightFence;
 };

@@ -2,6 +2,7 @@
 #include "VulkanInstance.h"
 #include "VulkanSurface.h"
 #include "VulkanSwapChain.h"
+#include "VulkanCommands.h"
 #include "VulkanGlobal.h"
 #include <stdexcept>
 #include <vector>
@@ -10,6 +11,7 @@
 VkInstance g_vkInstance;
 VulkanSurface* g_vkSurface;
 VulkanGraphicsPipeline* g_vkGraphicsPipeline;
+VulkanCommands* g_vkCommands;
 
 //Constructor for the class
 //The Constructor will go through and create and set everything up
@@ -23,8 +25,10 @@ VulkanInstance::VulkanInstance()
 	g_vkSurface = new VulkanSurface();
 	m_physicalDevice = new PhysicalDevice(m_validationLayers->GetEnableValidation(), m_validationLayers->GetValidationLayers());
 	CreateImageViews();
-	g_vkGraphicsPipeline = new VulkanGraphicsPipeline(m_physicalDevice->GetLogicalDevice());
-	m_frameBuffer = new VulkanFrameBuffer(m_swapChainImageViews, m_physicalDevice->GetLogicalDevice());
+	g_vkGraphicsPipeline = new VulkanGraphicsPipeline();
+	m_frameBuffer = new VulkanFrameBuffer(m_swapChainImageViews);
+	g_vkCommands = new VulkanCommands(m_physicalDevice, m_frameBuffer);
+	CreateSyncObjects();
 }
 
 //Deconstructor
@@ -32,17 +36,36 @@ VulkanInstance::VulkanInstance()
 //before this object gets deleted
 VulkanInstance::~VulkanInstance()
 {
+	vkDestroySemaphore(g_device, m_imageAvailableSemaphore, nullptr);
+	vkDestroySemaphore(g_device, m_renderFinishedSemaphore, nullptr);
+	vkDestroyFence(g_device, m_inFlightFence, nullptr);
+	delete g_vkCommands;
 	delete m_frameBuffer;
 	delete g_vkGraphicsPipeline;
 	for (auto imageView : m_swapChainImageViews)
 	{
-		vkDestroyImageView(m_physicalDevice->GetLogicalDevice(), imageView, nullptr);
+		vkDestroyImageView(g_device, imageView, nullptr);
 	}
 	delete m_physicalDevice;
 	delete m_validationLayers;
 	delete g_vkSurface;
 	//Vulkan instance should be the last thing that is destroyed
 	vkDestroyInstance(g_vkInstance, nullptr);
+}
+
+VkSemaphore VulkanInstance::GetImageAvailableSemaphore()
+{
+	return m_imageAvailableSemaphore;
+}
+
+VkSemaphore VulkanInstance::GetRenderFinishedSemaphore()
+{
+	return m_renderFinishedSemaphore;
+}
+
+VkFence* VulkanInstance::GetInFlightFenceRef()
+{
+	return &m_inFlightFence;
 }
 
 //Creates the vulkan instance
@@ -133,7 +156,7 @@ void VulkanInstance::CreateImageViews()
 		createInfo.subresourceRange.baseArrayLayer = 0;
 		createInfo.subresourceRange.layerCount = 1;
 
-		if (vkCreateImageView(m_physicalDevice->GetLogicalDevice(), &createInfo, nullptr, &m_swapChainImageViews[i]) != VK_SUCCESS)
+		if (vkCreateImageView(g_device, &createInfo, nullptr, &m_swapChainImageViews[i]) != VK_SUCCESS)
 		{
 			throw std::runtime_error("VulkanInstance: Failed to create image views");
 		}
@@ -160,4 +183,21 @@ void VulkanInstance::CheckExtensions()
 	}
 #endif // DEBUG
 
+}
+
+void VulkanInstance::CreateSyncObjects()
+{
+	VkSemaphoreCreateInfo semephoreInfo{};
+	semephoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+
+	VkFenceCreateInfo fenceInfo{};
+	fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+	fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
+
+	if (vkCreateSemaphore(g_device, &semephoreInfo, nullptr, &m_imageAvailableSemaphore) != VK_SUCCESS ||
+		vkCreateSemaphore(g_device, &semephoreInfo, nullptr, &m_renderFinishedSemaphore) != VK_SUCCESS ||
+		vkCreateFence(g_device, &fenceInfo, nullptr, &m_inFlightFence) != VK_SUCCESS)
+	{
+		throw std::runtime_error("VulkanInstance: Failed to create semaphores");
+	}
 }

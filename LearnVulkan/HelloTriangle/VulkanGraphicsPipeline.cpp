@@ -3,23 +3,28 @@
 #include "VulkanSwapChain.h"
 #include <fstream>
 
-VulkanGraphicsPipeline::VulkanGraphicsPipeline(VkDevice device)
+VulkanGraphicsPipeline::VulkanGraphicsPipeline()
 {
-	m_device = device;
+	//m_device = device;
 	CreateRenderPass();
 	CreateGraphicsPipeline();
 }
 
 VulkanGraphicsPipeline::~VulkanGraphicsPipeline()
 {
-	vkDestroyPipeline(m_device, m_graphicsPipeline, nullptr);
-	vkDestroyPipelineLayout(m_device, m_pipelineLayout, nullptr);
-	vkDestroyRenderPass(m_device, m_renderPass, nullptr);
+	vkDestroyPipeline(g_device, m_graphicsPipeline, nullptr);
+	vkDestroyPipelineLayout(g_device, m_pipelineLayout, nullptr);
+	vkDestroyRenderPass(g_device, m_renderPass, nullptr);
 }
 
 VkRenderPass VulkanGraphicsPipeline::GetRenderPass()
 {
 	return m_renderPass;
+}
+
+VkPipeline VulkanGraphicsPipeline::GetGraphicsPipeline()
+{
+	return m_graphicsPipeline;
 }
 
 void VulkanGraphicsPipeline::CreateRenderPass()
@@ -48,7 +53,7 @@ void VulkanGraphicsPipeline::CreateRenderPass()
 	renderPassInfo.subpassCount = 1;
 	renderPassInfo.pSubpasses = &subpass;
 
-	if (vkCreateRenderPass(m_device, &renderPassInfo, nullptr, &m_renderPass) != VK_SUCCESS)
+	if (vkCreateRenderPass(g_device, &renderPassInfo, nullptr, &m_renderPass) != VK_SUCCESS)
 	{
 		throw std::runtime_error("VulkanGraphicsPipeline: failed to create render pass");
 	}
@@ -175,7 +180,7 @@ void VulkanGraphicsPipeline::CreateGraphicsPipeline()
 	pipelineLayoutCreateInfo.pushConstantRangeCount = 0;
 	pipelineLayoutCreateInfo.pPushConstantRanges = nullptr;
 
-	if (vkCreatePipelineLayout(m_device, &pipelineLayoutCreateInfo, nullptr, &m_pipelineLayout) != VK_SUCCESS)
+	if (vkCreatePipelineLayout(g_device, &pipelineLayoutCreateInfo, nullptr, &m_pipelineLayout) != VK_SUCCESS)
 	{
 		throw std::runtime_error("VulkanGraphicsPipeline: Failed to create pipeline layout");
 	}
@@ -198,15 +203,15 @@ void VulkanGraphicsPipeline::CreateGraphicsPipeline()
 	pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
 	pipelineInfo.basePipelineIndex = 0;
 
-	if (vkCreateGraphicsPipelines(m_device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &m_graphicsPipeline) != VK_SUCCESS)
+	if (vkCreateGraphicsPipelines(g_device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &m_graphicsPipeline) != VK_SUCCESS)
 	{
 		throw std::runtime_error("VulkanGraphicsPipeline: failed to create graphics pipeline");
 	}
 	
 
 	//Shaders have served their purpose and are no longer needed
-	vkDestroyShaderModule(m_device, fragShaderModule, nullptr);
-	vkDestroyShaderModule(m_device, vertShaderModule, nullptr);
+	vkDestroyShaderModule(g_device, fragShaderModule, nullptr);
+	vkDestroyShaderModule(g_device, vertShaderModule, nullptr);
 }
 
 //takes the given binary code and turns it into a usable shader module
@@ -218,7 +223,7 @@ VkShaderModule VulkanGraphicsPipeline::createShaderModule(const std::vector<char
 	createInfo.pCode = reinterpret_cast<const uint32_t*>(code.data());	//using bytecode so we don't want the char it points to
 
 	VkShaderModule shaderModule;
-	if (vkCreateShaderModule(m_device, &createInfo, nullptr, &shaderModule) != VK_SUCCESS)
+	if (vkCreateShaderModule(g_device, &createInfo, nullptr, &shaderModule) != VK_SUCCESS)
 	{
 		throw std::runtime_error("VulkanGraphicsPipeline: Failed to create shader module");
 	}

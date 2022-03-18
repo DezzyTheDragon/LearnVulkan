@@ -7,6 +7,7 @@
 #include <set>
 
 VulkanSwapChain* g_vkSwapChain;
+VkDevice g_device;
 
 PhysicalDevice::PhysicalDevice(bool validation, std::vector<const char*> validationLayers)
 {
@@ -15,14 +16,14 @@ PhysicalDevice::PhysicalDevice(bool validation, std::vector<const char*> validat
 	g_vkSwapChain = new VulkanSwapChain();
 	PickPhysicalDevice();
 	CreateLogicalDevice();
-	g_vkSwapChain->SetLogicalDevice(m_logicalDevice);
+	//g_vkSwapChain->SetLogicalDevice(m_logicalDevice);
 	g_vkSwapChain->createSwapChain(m_physicalDevice);
 }
 
 PhysicalDevice::~PhysicalDevice()
 {
 	delete g_vkSwapChain;
-	vkDestroyDevice(m_logicalDevice, nullptr);
+	vkDestroyDevice(g_device, nullptr);
 }
 
 //Public getter for the found physical device
@@ -31,10 +32,10 @@ VkPhysicalDevice PhysicalDevice::GetPhysicalDevice()
 	return m_physicalDevice;
 }
 
-VkDevice PhysicalDevice::GetLogicalDevice()
-{
-	return m_logicalDevice;
-}
+//VkDevice PhysicalDevice::GetLogicalDevice()
+//{
+//	return m_logicalDevice;
+//}
 
 VkQueue PhysicalDevice::GetGraphicsQueue()
 {
@@ -123,13 +124,13 @@ void PhysicalDevice::CreateLogicalDevice()
 		createInfo.enabledLayerCount = 0;
 	}
 
-	if (vkCreateDevice(m_physicalDevice, &createInfo, nullptr, &m_logicalDevice) != VK_SUCCESS)
+	if (vkCreateDevice(m_physicalDevice, &createInfo, nullptr, &g_device) != VK_SUCCESS)
 	{
 		throw std::runtime_error("PhysicalDevice: Failed to create logical device");
 	}
 
-	vkGetDeviceQueue(m_logicalDevice, indices.graphicsFamily.value(), 0, &m_graphicsQueue);
-	vkGetDeviceQueue(m_logicalDevice, indices.presentFamily.value(), 0, &m_presentQueue);
+	vkGetDeviceQueue(g_device, indices.graphicsFamily.value(), 0, &m_graphicsQueue);
+	vkGetDeviceQueue(g_device, indices.presentFamily.value(), 0, &m_presentQueue);
 }
 
 //Check if the given device has what we need

@@ -15,16 +15,17 @@
 class VulkanGraphicsPipeline
 {
 public:
-	VulkanGraphicsPipeline(VkDevice device);
+	VulkanGraphicsPipeline();
 	~VulkanGraphicsPipeline();
 	VkRenderPass GetRenderPass();
+	VkPipeline GetGraphicsPipeline();
 private:
 	void CreateRenderPass();
 	void CreateGraphicsPipeline();
 	VkShaderModule createShaderModule(const std::vector<char>& code);
 
 	static std::vector<char> ReadFile(const std::string& fileName);
-	VkDevice m_device;
+	//VkDevice m_device;
 	VkRenderPass m_renderPass;
 	VkPipelineLayout m_pipelineLayout;
 	VkPipeline m_graphicsPipeline;
